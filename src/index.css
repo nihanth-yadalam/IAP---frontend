@@ -2,10 +2,222 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: light;
+@layer base {
+  :root {
+    /* ── Vibrant Light Theme ── */
+    --background: 220 30% 96%;
+    /* Cool grey-blue tint, not pure white */
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Richer Primary: Vivid Violet/Indigo */
+    --primary: 250 85% 60%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222 47% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    /* Vivid Accents */
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222 47% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 250 85% 60%;
+
+    --radius: 1rem;
+    /* More rounded */
+
+    /* Vibrant Palette (High Saturation) */
+    --vibrant-purple: 260 90% 65%;
+    --vibrant-blue: 220 90% 60%;
+    --vibrant-cyan: 190 90% 50%;
+    --vibrant-pink: 330 85% 60%;
+    --vibrant-orange: 25 95% 60%;
+    --vibrant-green: 150 80% 45%;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 250 85% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96.1%;
+    --sidebar-accent-foreground: 222 47% 11.2%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 250 85% 60%;
+  }
+
+  .dark {
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 250 85% 65%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 250 85% 65%;
+
+    --vibrant-purple: 260 90% 70%;
+    --vibrant-blue: 220 90% 65%;
+    --vibrant-cyan: 190 90% 60%;
+    --vibrant-pink: 330 85% 65%;
+    --vibrant-orange: 25 95% 65%;
+    --vibrant-green: 150 80% 50%;
+
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 250 85% 65%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 250 85% 65%;
+  }
 }
 
-html, body, #root {
-  height: 100%;
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background-image:
+      radial-gradient(at 0% 0%, hsla(var(--vibrant-purple), 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 0%, hsla(var(--vibrant-cyan), 0.15) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(var(--vibrant-pink), 0.1) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, hsla(var(--vibrant-blue), 0.1) 0px, transparent 50%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .dark .glass {
+    background: rgba(17, 24, 39, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  }
+
+  .dark .glass-card {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--vibrant-purple)), hsl(var(--vibrant-cyan)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .gradient-border-bottom {
+    position: relative;
+  }
+
+  .gradient-border-bottom::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, hsl(var(--vibrant-purple)), hsl(var(--vibrant-cyan)));
+  }
+}
+
+/* RBC overrides adapted for Vibrant theme */
+.rbc-calendar {
+  font-family: "Inter", sans-serif !important;
+}
+
+.rbc-header {
+  padding: 12px 4px !important;
+  font-weight: 600 !important;
+  color: hsl(var(--foreground)) !important;
+  text-transform: uppercase;
+  font-size: 0.75rem !important;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid hsl(var(--border)) !important;
+}
+
+.rbc-event {
+  border-radius: 6px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+.rbc-today {
+  background-color: hsla(var(--vibrant-blue), 0.05) !important;
+}
+
+.rbc-time-view,
+.rbc-month-view {
+  border: none !important;
+  background: transparent !important;
+}
+
+.rbc-day-slot .rbc-time-slot {
+  border-top: 1px solid hsla(var(--border), 0.5) !important;
+}
+
+.rbc-timeslot-group {
+  border-bottom: 1px solid hsla(var(--border), 0.5) !important;
+}
+
+.rbc-time-header-content {
+  border-left: 1px solid hsla(var(--border), 0.5) !important;
+}
+
+.rbc-time-content {
+  border-top: 1px solid hsla(var(--border), 0.5) !important;
+}
+
+.rbc-time-content>*+*>* {
+  border-left: 1px solid hsla(var(--border), 0.5) !important;
 }

@@ -1,10 +1,14 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 export default function Protected({ children }: { children: React.ReactNode }) {
-  const { token, isLoading } = useAuth();
-  if (isLoading) return <div className="p-6">Loading…</div>;
-  if (!token) return <Navigate to="/login" replace />;
+  const { isAuthenticated, token } = useAuthStore();
+  const location = useLocation();
+
+  if (!isAuthenticated || !token) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
   return <>{children}</>;
 }

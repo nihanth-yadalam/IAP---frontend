@@ -6,7 +6,7 @@ type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 
 type ApiResponse<T = any> = { data: T };
 
-type User = { id: string; email: string; password: string; name?: string | null };
+type User = { id: string; email: string; username: string; password: string; name?: string | null };
 type Profile = {
   name?: string;
   university?: string;
@@ -117,7 +117,7 @@ function saveFeedbackMap(m: Record<string, Feedback[]>) {
   writeJSON(LS.feedback, m);
 }
 
-function ok<T>(data: T): ApiResponse<T> {
+function ok<T>(data: T): Promise<ApiResponse<T>> {
   return Promise.resolve({ data });
 }
 
@@ -201,22 +201,28 @@ function scheduleTasksHeuristic(userId: string) {
 async function handle(method: HttpMethod, path: string, body?: any): Promise<ApiResponse<any>> {
   // Auth endpoints
   if (method === "POST" && path === "/auth/signup") {
-    const { name, email, password } = body ?? {};
-    if (!email || !password) throw { response: { data: { detail: "Email and password required" } } };
+    const { username, email, password, name } = body ?? {};
+    if (!email || !password || !username) throw { response: { data: { detail: "Username, email and password required" } } };
     const users = getAllUsers();
     if (users.some(u => u.email.toLowerCase() === String(email).toLowerCase())) {
       throw { response: { data: { detail: "Email already exists" } } };
     }
-    const u: User = { id: uid(), email, password, name: name ?? null };
+    if (users.some(u => u.username?.toLowerCase() === String(username).toLowerCase())) {
+      throw { response: { data: { detail: "Username already exists" } } };
+    }
+    const u: User = { id: uid(), email, password, username, name: name ?? null };
     users.push(u);
     saveUsers(users);
     return ok({ id: u.id });
   }
 
   if (method === "POST" && path === "/auth/login") {
-    const { email, password } = body ?? {};
+    const { login, password } = body ?? {}; // login can be email or username
     const users = getAllUsers();
-    const u = users.find(x => x.email.toLowerCase() === String(email).toLowerCase());
+    const u = users.find(x =>
+      x.email.toLowerCase() === String(login).toLowerCase() ||
+      x.username?.toLowerCase() === String(login).toLowerCase()
+    );
     if (!u || u.password !== password) {
       throw { response: { data: { detail: "Invalid credentials" } } };
     }
@@ -232,7 +238,7 @@ async function handle(method: HttpMethod, path: string, body?: any): Promise<Api
     const u = users.find(x => x.id === userId);
     if (!u) throw { response: { data: { detail: "User not found" } } };
     const profile = getProfileMap()[userId] ?? {};
-    return ok({ id: u.id, email: u.email, name: profile.name ?? u.name ?? null });
+    return ok({ id: u.id, email: u.email, username: u.username, name: profile.name ?? u.name ?? null });
   }
 
   if (method === "POST" && path === "/auth/forgot-password") {
@@ -298,6 +304,38 @@ async function handle(method: HttpMethod, path: string, body?: any): Promise<Api
     return ok(t);
   }
 
+  // Update task endpoint: PUT /tasks/{id}
+  const taskMatch = path.match(/^\/tasks\/([^/]+)$/);
+  if (method === "PUT" && taskMatch) {
+    const userId = requireUserId();
+    const id = taskMatch[1];
+    const taskMap = getTaskMap();
+    const tasks = taskMap[userId] ?? [];
+    const idx = tasks.findIndex(t => t.id === id);
+    if (idx === -1) throw { response: { data: { detail: "Task not found" } } };
+
+    // Merge updates
+    tasks[idx] = { ...tasks[idx], ...body };
+    taskMap[userId] = tasks;
+    saveTaskMap(taskMap);
+    return ok(tasks[idx]);
+  }
+
+  // Delete task endpoint: DELETE /tasks/{id}
+  if (method === "DELETE" && taskMatch) {
+    const userId = requireUserId();
+    const id = taskMatch[1];
+    const taskMap = getTaskMap();
+    const tasks = taskMap[userId] ?? [];
+    const idx = tasks.findIndex(t => t.id === id);
+    if (idx === -1) throw { response: { data: { detail: "Task not found" } } };
+
+    tasks.splice(idx, 1);
+    taskMap[userId] = tasks;
+    saveTaskMap(taskMap);
+    return ok({ ok: true });
+  }
+
   // complete task endpoint: /tasks/{id}/complete
   const completeMatch = path.match(/^\/tasks\/([^/]+)\/complete$/);
   if (method === "POST" && completeMatch) {
@@ -330,6 +368,52 @@ async function handle(method: HttpMethod, path: string, body?: any): Promise<Api
   if (method === "POST" && path === "/schedule/run") {
     const userId = requireUserId();
     scheduleTasksHeuristic(userId);
+    return ok({ ok: true });
+  }
+
+  // Courses endpoints
+  if (method === "GET" && path === "/courses") {
+    const userId = requireUserId();
+    const courses = readJSON<any[]>(`aap_courses_${userId}`, []);
+    return ok(courses);
+  }
+
+  if (method === "POST" && path === "/courses") {
+    const userId = requireUserId();
+    const courses = readJSON<any[]>(`aap_courses_${userId}`, []);
+    const c = {
+      id: uid(),
+      name: body?.name || "New Course",
+      code: body?.code || "",
+      color: body?.color || "#3b82f6",
+      term: body?.term
+    };
+    courses.push(c);
+    writeJSON(`aap_courses_${userId}`, courses);
+    return ok(c);
+  }
+
+  const courseMatch = path.match(/^\/courses\/([^/]+)$/);
+  if (method === "PUT" && courseMatch) {
+    const userId = requireUserId();
+    const id = courseMatch[1];
+    const courses = readJSON<any[]>(`aap_courses_${userId}`, []);
+    const idx = courses.findIndex(c => c.id === id);
+    if (idx === -1) throw { response: { data: { detail: "Course not found" } } };
+    courses[idx] = { ...courses[idx], ...body };
+    writeJSON(`aap_courses_${userId}`, courses);
+    return ok(courses[idx]);
+  }
+
+  if (method === "DELETE" && courseMatch) {
+    const userId = requireUserId();
+    const id = courseMatch[1];
+    const courses = readJSON<any[]>(`aap_courses_${userId}`, []);
+    const idx = courses.findIndex(c => c.id === id);
+    if (idx !== -1) {
+      courses.splice(idx, 1);
+      writeJSON(`aap_courses_${userId}`, courses);
+    }
     return ok({ ok: true });
   }
 

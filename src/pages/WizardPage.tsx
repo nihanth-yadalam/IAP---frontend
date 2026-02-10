@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { BusySlotPainter } from "@/components/BusySlotPainter";
 import { api } from "@/lib/api";
-import { useAuth } from "@/context/AuthContext";
+import { useAuthStore } from "@/stores/useAuthStore";
 
 type Chronotype = "morning" | "balanced" | "night";
 type WorkStyle = "deep" | "mixed" | "sprints";
@@ -14,7 +14,7 @@ const steps = ["Welcome", "Profile", "Chronotype", "Attention", "Busy Slots", "G
 
 export default function WizardPage() {
   const nav = useNavigate();
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const [step, setStep] = useState(0);
 
   const [name, setName] = useState(user?.name ?? "");
@@ -39,9 +39,9 @@ export default function WizardPage() {
       const hours = Object.keys(busyGrid)
         .filter(k => k.startsWith(`${d}-`))
         .map(k => parseInt(k.split("-")[1], 10))
-        .sort((a,b)=>a-b);
+        .sort((a, b) => a - b);
       // collapse contiguous hours into ranges
-      let i=0;
+      let i = 0;
       while (i < hours.length) {
         const start = hours[i];
         let end = start + 1;
@@ -69,7 +69,7 @@ export default function WizardPage() {
     // Frontend-only: this is a UI stub.
     alert("Google Calendar connect is a UI stub in the frontend-only build.");
   }
-return (
+  return (
     <div className="min-h-full bg-slate-50 p-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-4 flex items-center justify-between">
@@ -101,15 +101,15 @@ return (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
                     <div className="text-sm mb-1">Name</div>
-                    <Input value={name} onChange={(e)=>setName(e.target.value)} placeholder="Your name" />
+                    <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
                   </div>
                   <div>
                     <div className="text-sm mb-1">University</div>
-                    <Input value={university} onChange={(e)=>setUniversity(e.target.value)} placeholder="University" />
+                    <Input value={university} onChange={(e) => setUniversity(e.target.value)} placeholder="University" />
                   </div>
                   <div>
                     <div className="text-sm mb-1">Major</div>
-                    <Input value={major} onChange={(e)=>setMajor(e.target.value)} placeholder="Major/Department" />
+                    <Input value={major} onChange={(e) => setMajor(e.target.value)} placeholder="Major/Department" />
                   </div>
                 </div>
               </div>
@@ -120,9 +120,9 @@ return (
                 <div className="text-lg font-semibold">Chronotype</div>
                 <div className="text-slate-600">Are you a Morning Lark or a Night Owl?</div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <ChoiceCard label="Morning Lark" active={chronotype === "morning"} onClick={()=>setChronotype("morning")} desc="Best focus early day" />
-                  <ChoiceCard label="Balanced" active={chronotype === "balanced"} onClick={()=>setChronotype("balanced")} desc="Steady focus through day" />
-                  <ChoiceCard label="Night Owl" active={chronotype === "night"} onClick={()=>setChronotype("night")} desc="Peak focus late evening" />
+                  <ChoiceCard label="Morning Lark" active={chronotype === "morning"} onClick={() => setChronotype("morning")} desc="Best focus early day" />
+                  <ChoiceCard label="Balanced" active={chronotype === "balanced"} onClick={() => setChronotype("balanced")} desc="Steady focus through day" />
+                  <ChoiceCard label="Night Owl" active={chronotype === "night"} onClick={() => setChronotype("night")} desc="Peak focus late evening" />
                 </div>
               </div>
             )}
@@ -134,13 +134,13 @@ return (
                   <div className="text-slate-600">Do you prefer deep work or short sprints?</div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <ChoiceCard label="Deep Work" active={workStyle === "deep"} onClick={()=>setWorkStyle("deep")} desc="90–180 min blocks" />
-                  <ChoiceCard label="Mixed" active={workStyle === "mixed"} onClick={()=>setWorkStyle("mixed")} desc="Flexible blocks" />
-                  <ChoiceCard label="Sprints" active={workStyle === "sprints"} onClick={()=>setWorkStyle("sprints")} desc="25–45 min bursts" />
+                  <ChoiceCard label="Deep Work" active={workStyle === "deep"} onClick={() => setWorkStyle("deep")} desc="90–180 min blocks" />
+                  <ChoiceCard label="Mixed" active={workStyle === "mixed"} onClick={() => setWorkStyle("mixed")} desc="Flexible blocks" />
+                  <ChoiceCard label="Sprints" active={workStyle === "sprints"} onClick={() => setWorkStyle("sprints")} desc="25–45 min bursts" />
                 </div>
                 <div>
                   <div className="text-sm mb-1">Ideal session length (minutes)</div>
-                  <Input type="number" value={sessionLength} onChange={(e)=>setSessionLength(parseInt(e.target.value||"0",10))} min={15} max={240} />
+                  <Input type="number" value={sessionLength} onChange={(e) => setSessionLength(parseInt(e.target.value || "0", 10))} min={15} max={240} />
                 </div>
               </div>
             )}
@@ -161,7 +161,7 @@ return (
                 <div className="flex flex-wrap gap-3 items-center">
                   <Button onClick={connectGoogle}>Connect Google Calendar</Button>
                   <label className="flex items-center gap-2 text-sm">
-                    <input type="checkbox" checked={calendarWrite} onChange={(e)=>setCalendarWrite(e.target.checked)} />
+                    <input type="checkbox" checked={calendarWrite} onChange={(e) => setCalendarWrite(e.target.checked)} />
                     Allow writing tasks to my Google Calendar
                   </label>
                 </div>

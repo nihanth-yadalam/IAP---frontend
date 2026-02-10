@@ -1,9 +1,15 @@
-import React, { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { useState, useEffect } from "react";
+import { useCourseStore } from "@/stores/useCourseStore";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/lib/api";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
+import { useTaskStore } from "@/stores/useTaskStore";
+import { DatePicker } from "@/components/DatePicker";
+import { format } from "date-fns";
 
 type Category = "exam" | "assignment" | "extra";
 type Priority = "low" | "medium" | "high";
@@ -11,91 +17,141 @@ type Priority = "low" | "medium" | "high";
 export default function ScheduleDialog({
   open,
   onOpenChange,
-  onCreated
+  taskToEdit,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
-  onCreated: () => void;
+  taskToEdit?: any;
 }) {
+  const { addTask, updateTask, isLoading } = useTaskStore();
+  const { courses, fetchCourses } = useCourseStore();
+
   const [category, setCategory] = useState<Category>("assignment");
   const [priority, setPriority] = useState<Priority>("medium");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [deadline, setDeadline] = useState("");
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [time, setTime] = useState("23:59");
+  const [courseId, setCourseId] = useState("other");
   const [err, setErr] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  async function submit() {
-    setErr(null);
-    setLoading(true);
-    try {
-      await api.post("/tasks", {
-        category,
-        priority,
-        title,
-        description,
-        deadline
-      });
-      setTitle(""); setDescription(""); setDeadline("");
-      onOpenChange(false);
-      onCreated();
-    } catch (e: any) {
-      setErr(e?.response?.data?.detail ?? "Failed to create task");
-    } finally {
-      setLoading(false);
+  useEffect(() => { fetchCourses(); }, []);
+
+  useEffect(() => {
+    if (taskToEdit) {
+      setTitle(taskToEdit.title);
+      setDescription(taskToEdit.description || "");
+      setCategory(taskToEdit.category);
+      setPriority(taskToEdit.priority);
+      if (taskToEdit.deadline) {
+        const d = new Date(taskToEdit.deadline);
+        setDate(d);
+        setTime(format(d, "HH:mm"));
+      }
+      setCourseId(taskToEdit.course_id || "other");
+    } else {
+      setTitle(""); setDescription(""); setCategory("assignment");
+      setPriority("medium"); setDate(undefined); setTime("23:59"); setCourseId("other");
     }
+  }, [taskToEdit, open]);
+
+  async function handleSubmit() {
+    setErr(null);
+    if (!title || !date) return;
+    try {
+      const combined = new Date(date);
+      const [h, m] = time.split(":").map(Number);
+      combined.setHours(h, m, 0, 0);
+      const payload = { category, priority, title, description, deadline: combined.toISOString() };
+      if (taskToEdit) { await updateTask(taskToEdit.id, payload); }
+      else { await addTask(payload); }
+      onOpenChange(false);
+    } catch (e: any) { setErr(e?.message || "Failed to save task"); }
   }
+
+  const categoryEmoji = { exam: "📝", assignment: "📋", extra: "🎭" };
+  const priorityEmoji = { low: "🟢", medium: "🟡", high: "🔴" };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogTitle>Schedule a task</DialogTitle>
-        <DialogDescription>Add an exam, assignment, or extracurricular item.</DialogDescription>
+      <DialogContent className="sm:max-w-[550px] rounded-2xl bg-card border-border/50 glass-card">
+        <DialogHeader>
+          <DialogTitle className="text-xl">{taskToEdit ? "Edit Task" : "Schedule Task"}</DialogTitle>
+          <DialogDescription>
+            {taskToEdit ? "Update the details of your task." : "Add a new task, assignment, or exam."}
+          </DialogDescription>
+        </DialogHeader>
 
-        <div className="mt-4 space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <div className="text-sm mb-1">Category</div>
-              <select className="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm" value={category} onChange={(e)=>setCategory(e.target.value as Category)}>
-                <option value="exam">Exam</option>
-                <option value="assignment">Assignment</option>
-                <option value="extra">Extra curricular</option>
-              </select>
+        <div className="grid gap-5 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Category</Label>
+              <Select value={category} onValueChange={(v) => setCategory(v as Category)}>
+                <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="exam">{categoryEmoji.exam} Exam</SelectItem>
+                  <SelectItem value="assignment">{categoryEmoji.assignment} Assignment</SelectItem>
+                  <SelectItem value="extra">{categoryEmoji.extra} Extra Curricular</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div>
-              <div className="text-sm mb-1">Priority</div>
-              <select className="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm" value={priority} onChange={(e)=>setPriority(e.target.value as Priority)}>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Priority</Label>
+              <Select value={priority} onValueChange={(v) => setPriority(v as Priority)}>
+                <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">{priorityEmoji.low} Low</SelectItem>
+                  <SelectItem value="medium">{priorityEmoji.medium} Medium</SelectItem>
+                  <SelectItem value="high">{priorityEmoji.high} High</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          <div>
-            <div className="text-sm mb-1">Title</div>
-            <Input value={title} onChange={(e)=>setTitle(e.target.value)} placeholder="e.g., DS Lab Eval" />
+          <div className="space-y-2">
+            <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Subject / Course</Label>
+            <Select value={courseId} onValueChange={setCourseId}>
+              <SelectTrigger className="rounded-xl"><SelectValue placeholder="Select a course" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="other">Other</SelectItem>
+                {courses.map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.code} - {c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
-          <div>
-            <div className="text-sm mb-1">Description</div>
-            <Textarea value={description} onChange={(e)=>setDescription(e.target.value)} placeholder="Optional details…" />
+          <div className="space-y-2">
+            <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Title</Label>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Task title" className="rounded-xl h-11" />
           </div>
 
-          <div>
-            <div className="text-sm mb-1">Deadline</div>
-            <Input type="datetime-local" value={deadline} onChange={(e)=>setDeadline(e.target.value)} />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Due Date</Label>
+              <DatePicker date={date} setDate={setDate} />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Time</Label>
+              <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="rounded-xl h-11" />
+            </div>
           </div>
 
-          {err ? <div className="text-sm text-red-600">{err}</div> : null}
-
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button onClick={submit} disabled={loading || !title || !deadline}>
-              {loading ? "Saving…" : "Save & schedule"}
-            </Button>
+          <div className="space-y-2">
+            <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Description</Label>
+            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Add details..." className="rounded-xl resize-none" rows={3} />
           </div>
+
+          {err && <div className="text-sm font-medium text-destructive bg-destructive/10 px-3 py-2 rounded-lg animate-fade-in">{err}</div>}
         </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl">Cancel</Button>
+          <Button onClick={handleSubmit} disabled={isLoading || !title || !date} className="rounded-xl shadow-neon transition-all hover:-translate-y-0.5">
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Save
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

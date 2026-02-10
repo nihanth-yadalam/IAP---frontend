@@ -1,0 +1,214 @@
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { api } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BusySlotPainter } from "@/components/BusySlotPainter";
+import { Loader2, User, Clock, Link as LinkIcon, Calendar, Settings2 } from "lucide-react";
+
+export default function SettingsPage() {
+    const { user } = useAuthStore();
+    const [loading, setLoading] = useState(false);
+
+    // Profile State
+    const [name, setName] = useState("");
+    const [university, setUniversity] = useState("");
+    const [major, setMajor] = useState("");
+
+    // Preferences State
+    const [chronotype, setChronotype] = useState("balanced");
+    const [workStyle, setWorkStyle] = useState("mixed");
+    const [sessionLength, setSessionLength] = useState(60);
+
+    // Schedule State
+    const [busyGrid, setBusyGrid] = useState<Record<string, boolean>>({});
+
+    useEffect(() => {
+        loadProfile();
+    }, []);
+
+    async function loadProfile() {
+        try {
+            const res = await api.get("/auth/me");
+            if (res.data) {
+                setName(res.data.name || "");
+                setUniversity(res.data.university || "");
+                setMajor(res.data.major || "");
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    async function handleSaveProfile() {
+        setLoading(true);
+        try {
+            await api.post("/profile/baseline", { name, university, major, chronotype, work_style: workStyle, preferred_session_mins: sessionLength });
+        } catch (e) { console.error(e); }
+        setLoading(false);
+    }
+
+    async function handleSaveSchedule() {
+        setLoading(true);
+        try {
+            const slots: any[] = [];
+            for (let d = 0; d < 7; d++) {
+                const hours = Object.keys(busyGrid)
+                    .filter(k => k.startsWith(`${d}-`) && busyGrid[k])
+                    .map(k => parseInt(k.split("-")[1], 10))
+                    .sort((a, b) => a - b);
+                let i = 0;
+                while (i < hours.length) {
+                    const start = hours[i]; let end = start + 1; i++;
+                    while (i < hours.length && hours[i] === end) { end++; i++; }
+                    slots.push({ day_of_week: d, start_hour: start, end_hour: end, slot_type: "fixed", title: "Busy" });
+                }
+            }
+            await api.post("/busy-slots/bulk", { slots });
+        } catch (e) { console.error(e); }
+        setLoading(false);
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="space-y-1">
+                <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+                    <Settings2 className="h-7 w-7 text-primary" />
+                    Settings
+                </h1>
+                <p className="text-muted-foreground">Manage your profile, preferences, and schedule.</p>
+            </div>
+
+            <Tabs defaultValue="general" className="space-y-6">
+                <TabsList className="rounded-xl bg-secondary/60 p-1">
+                    <TabsTrigger value="general" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm transition-all">
+                        <User className="mr-1.5 h-4 w-4" /> General
+                    </TabsTrigger>
+                    <TabsTrigger value="schedule" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm transition-all">
+                        <Clock className="mr-1.5 h-4 w-4" /> Schedule
+                    </TabsTrigger>
+                    <TabsTrigger value="integrations" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm transition-all">
+                        <LinkIcon className="mr-1.5 h-4 w-4" /> Integrations
+                    </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="general" className="space-y-6 animate-fade-in">
+                    {/* Profile */}
+                    <Card className="rounded-2xl border-border/50">
+                        <CardHeader>
+                            <CardTitle className="text-lg">Profile</CardTitle>
+                            <CardDescription>Your personal information.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-5">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Full Name</Label>
+                                    <Input value={name} onChange={e => setName(e.target.value)} placeholder="Your name" className="rounded-xl" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>University</Label>
+                                    <Input value={university} onChange={e => setUniversity(e.target.value)} placeholder="Your university" className="rounded-xl" />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Major</Label>
+                                    <Input value={major} onChange={e => setMajor(e.target.value)} placeholder="Your major" className="rounded-xl" />
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Preferences */}
+                    <Card className="rounded-2xl border-border/50">
+                        <CardHeader>
+                            <CardTitle className="text-lg">Preferences</CardTitle>
+                            <CardDescription>Help Schedora learn how you work best.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-5">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Chronotype</Label>
+                                    <Select value={chronotype} onValueChange={setChronotype}>
+                                        <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="morning">🌅 Morning Lark</SelectItem>
+                                            <SelectItem value="balanced">⚖️ Balanced</SelectItem>
+                                            <SelectItem value="night">🌙 Night Owl</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Work Style</Label>
+                                    <Select value={workStyle} onValueChange={setWorkStyle}>
+                                        <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="deep">🎯 Deep Work</SelectItem>
+                                            <SelectItem value="mixed">🔄 Mixed</SelectItem>
+                                            <SelectItem value="sprints">⚡ Sprints</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Session Length (min)</Label>
+                                    <Input type="number" value={sessionLength} onChange={e => setSessionLength(parseInt(e.target.value || "0", 10))} min={15} max={240} className="rounded-xl" />
+                                </div>
+                            </div>
+                            <div className="flex justify-end">
+                                <Button onClick={handleSaveProfile} disabled={loading} className="rounded-xl">
+                                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Save Changes
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="schedule" className="space-y-6 animate-fade-in">
+                    <Card className="rounded-2xl border-border/50">
+                        <CardHeader>
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <Calendar className="h-5 w-5 text-primary" />
+                                Fixed Weekly Schedule
+                            </CardTitle>
+                            <CardDescription>Paint your recurring busy slots (classes, work, etc). The scheduler will avoid these times.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <BusySlotPainter value={busyGrid} onChange={setBusyGrid} />
+                            <div className="flex justify-end">
+                                <Button onClick={handleSaveSchedule} disabled={loading} className="rounded-xl">
+                                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Save Schedule
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="integrations" className="space-y-6 animate-fade-in">
+                    <Card className="rounded-2xl border-border/50">
+                        <CardHeader>
+                            <CardTitle className="text-lg">Google Calendar</CardTitle>
+                            <CardDescription>Connect your Google Calendar to import events as busy slots.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex items-center justify-between rounded-xl border border-dashed border-border/60 bg-accent/20 p-6">
+                                <div className="space-y-1">
+                                    <p className="font-medium">Google Calendar</p>
+                                    <p className="text-sm text-muted-foreground">Import events and export scheduled tasks.</p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    className="rounded-xl"
+                                    onClick={() => alert("Google Calendar connect is a UI stub in the frontend-only build.")}
+                                >
+                                    Connect
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
+        </div>
+    );
+}

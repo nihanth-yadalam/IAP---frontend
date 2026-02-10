@@ -1,22 +1,28 @@
-import React from "react";
+
 import { Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/context/AuthContext";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import WizardPage from "@/pages/WizardPage";
 import HomePage from "@/pages/HomePage";
+import CalendarPage from "@/pages/CalendarPage";
+import TasksPage from "@/pages/TasksPage";
+import CoursesPage from "@/pages/CoursesPage";
+import SettingsPage from "@/pages/SettingsPage";
 import Protected from "./Protected";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { ThemeProvider } from "@/components/theme-provider";
 
 export default function App() {
   return (
-    <AuthProvider>
+    <ThemeProvider defaultTheme="system" storageKey="schedora-ui-theme">
       <Routes>
-        <Route path="/" element={<Navigate to="/app" replace />} />
+        {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/forgot" element={<ForgotPasswordPage />} />
 
+        {/* Protected Routes */}
         <Route
           path="/wizard"
           element={
@@ -26,15 +32,25 @@ export default function App() {
           }
         />
 
+        {/* App Layout Routes */}
         <Route
-          path="/app"
+          path="/"
           element={
             <Protected>
-              <HomePage />
+              <AppLayout />
             </Protected>
           }
-        />
+        >
+          <Route index element={<Navigate to="/dashboard" replace />} />
+          <Route path="dashboard" element={<HomePage />} />
+          <Route path="calendar" element={<CalendarPage />} />
+          <Route path="tasks" element={<TasksPage />} />
+          <Route path="courses" element={<CoursesPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </AuthProvider>
+    </ThemeProvider>
   );
 }
