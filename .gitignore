@@ -4,3 +4,7 @@ build/
 .vite/
 *.tsbuildinfo
 .env*
+Project_Overview.txt
+Core_Features.txt
+Epics.txt
+Tech stack and DB schema.txt

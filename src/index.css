@@ -110,6 +110,12 @@
   }
 
   /* Ensure input text and autofill are always visible */
+  input,
+  textarea,
+  select {
+    color: hsl(var(--foreground)) !important;
+  }
+
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
@@ -118,6 +124,12 @@
     -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
     box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
     caret-color: hsl(var(--foreground));
+  }
+
+  .dark input,
+  .dark textarea,
+  .dark select {
+    color: hsl(var(--foreground)) !important;
   }
 
   .dark input:-webkit-autofill,
