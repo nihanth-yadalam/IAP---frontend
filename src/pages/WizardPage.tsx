@@ -12,8 +12,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Info, CheckCircle2, ArrowRight, ArrowLeft, X, Trophy, Save, GraduationCap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Chronotype = "morning" | "balanced" | "night";
-type WorkStyle = "deep" | "mixed" | "sprints";
+type Chronotype = "morning" | "balanced" | "night" | undefined | null;
+type WorkStyle = "deep" | "mixed" | "sprints" | undefined | null;
 
 const steps = [
   { id: "intro", title: "Welcome" },
@@ -36,8 +36,8 @@ export default function WizardPage() {
   const [name, setName] = useState(user?.name ?? "");
   const [university, setUniversity] = useState("");
   const [major, setMajor] = useState("");
-  const [chronotype, setChronotype] = useState<Chronotype>("balanced");
-  const [workStyle, setWorkStyle] = useState<WorkStyle>("mixed");
+  const [chronotype, setChronotype] = useState<Chronotype | null>(null);
+  const [workStyle, setWorkStyle] = useState<WorkStyle | null>(null);
   const [sessionLength, setSessionLength] = useState(60);
   const [busyGrid, setBusyGrid] = useState<Record<string, boolean>>({});
   const [calendarWrite, setCalendarWrite] = useState(false);
@@ -132,12 +132,12 @@ export default function WizardPage() {
     <div className="min-h-screen bg-background relative flex flex-col items-center justify-center p-4 overflow-hidden">
       {/* Decorative Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-background to-purple-500/5 -z-10" />
-      <div className="absolute top-0 w-full h-1 bg-muted">
+      <div className="absolute top-0 w-full h-2 bg-muted/50 backdrop-blur-sm z-50">
         <motion.div
-          className="h-full bg-primary"
+          className="h-full bg-primary shadow-[0_0_10px_rgba(var(--primary),0.5)]"
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.5, ease: "circOut" }}
         />
       </div>
 
@@ -157,8 +157,8 @@ export default function WizardPage() {
         </div>
       </div>
 
-      {/* Main Card */}
-      <div className="w-full max-w-2xl relative z-10">
+      {/* Main Content Area */}
+      <div className="w-full max-w-4xl relative z-10 px-4">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={step}
@@ -167,45 +167,43 @@ export default function WizardPage() {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
             className="w-full"
           >
-            <Card className="border-none shadow-2xl bg-card/80 backdrop-blur-md">
-              <CardContent className="p-8 md:p-12 min-h-[500px] flex flex-col">
-                {/* Step Content Render */}
-                <StepContent
-                  step={step}
-                  data={{ name, university, major, chronotype, workStyle, sessionLength, busyGrid, calendarWrite }}
-                  setters={{ setName, setUniversity, setMajor, setChronotype, setWorkStyle, setSessionLength, setBusyGrid, setCalendarWrite }}
-                />
+            <div className="min-h-[500px] flex flex-col justify-center">
+              {/* Step Content Render */}
+              <StepContent
+                step={step}
+                data={{ name, university, major, chronotype, workStyle, sessionLength, busyGrid, calendarWrite }}
+                setters={{ setName, setUniversity, setMajor, setChronotype, setWorkStyle, setSessionLength, setBusyGrid, setCalendarWrite }}
+              />
 
-                {/* Navigation Footer */}
-                <div className="mt-auto pt-8 flex items-center justify-between border-t border-border/50">
-                  <div className="flex items-center gap-2">
-                    {step > 0 && (
-                      <Button variant="ghost" onClick={back} className="gap-2 pl-2">
-                        <ArrowLeft className="h-4 w-4" /> Back
-                      </Button>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-4">
-                    {autoSaveState === "saving" && <span className="text-xs text-muted-foreground flex items-center gap-1"><Save className="h-3 w-3 animate-pulse" /> Saving...</span>}
-                    {autoSaveState === "saved" && <span className="text-xs text-green-500 flex items-center gap-1"><CheckCircle2 className="h-3 w-3" /> Saved</span>}
-
-                    {step < steps.length - 1 ? (
-                      <Button onClick={next} className="gap-2 pr-2 min-w-[120px]">
-                        {step === 0 ? "Get Started" : "Next"} <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    ) : (
-                      <Button onClick={() => nav("/dashboard")} className="gap-2 bg-green-500 hover:bg-green-600 text-white min-w-[140px] shadow-lg shadow-green-500/20">
-                        Go to Dashboard <CheckCircle2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
+              {/* Navigation Footer */}
+              <div className="mt-12 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {step > 0 && (
+                    <Button variant="ghost" size="lg" onClick={back} className="gap-2 pl-2 text-muted-foreground hover:text-foreground">
+                      <ArrowLeft className="h-5 w-5" /> Back
+                    </Button>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
+
+                <div className="flex items-center gap-6">
+                  {autoSaveState === "saving" && <span className="text-sm text-muted-foreground flex items-center gap-1"><Save className="h-4 w-4 animate-pulse" /> Saving...</span>}
+                  {autoSaveState === "saved" && <span className="text-sm text-green-500 flex items-center gap-1"><CheckCircle2 className="h-4 w-4" /> Saved</span>}
+
+                  {step < steps.length - 1 ? (
+                    <Button onClick={next} size="lg" className="gap-2 text-lg px-8 rounded-full shadow-lg shadow-primary/25">
+                      {step === 0 ? "Get Started" : "Next Step"} <ArrowRight className="h-5 w-5" />
+                    </Button>
+                  ) : (
+                    <Button onClick={() => nav("/dashboard")} size="lg" className="gap-2 bg-green-500 hover:bg-green-600 text-white text-lg px-8 rounded-full shadow-lg shadow-green-500/20">
+                      Go to Dashboard <CheckCircle2 className="h-5 w-5" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
           </motion.div>
         </AnimatePresence>
       </div>
@@ -472,13 +470,20 @@ function SelectableCard({ title, desc, icon, selected, onClick }: any) {
     <div
       onClick={onClick}
       className={cn(
-        "cursor-pointer rounded-xl border-2 p-5 transition-all duration-200 hover:scale-[1.02]",
-        selected ? "border-primary bg-primary/5 shadow-md" : "border-muted bg-card hover:border-primary/50"
+        "cursor-pointer rounded-2xl border-2 p-6 transition-all duration-300 hover:scale-[1.03] hover:shadow-xl relative overflow-hidden group",
+        selected
+          ? "border-primary bg-primary/10 shadow-lg ring-2 ring-primary/20"
+          : "border-border bg-background/60 backdrop-blur-sm hover:border-primary/50 hover:bg-background/80"
       )}
     >
-      <div className="text-3xl mb-3">{icon}</div>
-      <div className="font-bold text-foreground mb-1">{title}</div>
-      <div className="text-xs text-muted-foreground leading-relaxed">{desc}</div>
+      {selected && (
+        <div className="absolute top-4 right-4 text-primary bg-white rounded-full p-1 shadow-sm">
+          <CheckCircle2 className="h-5 w-5" />
+        </div>
+      )}
+      <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">{icon}</div>
+      <div className="font-bold text-xl text-foreground mb-2">{title}</div>
+      <div className="text-sm text-muted-foreground leading-relaxed">{desc}</div>
     </div>
   )
 }
