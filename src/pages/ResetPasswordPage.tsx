@@ -81,7 +81,7 @@ export default function ResetPasswordPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="rounded-xl h-11 bg-card/80 border-border focus:border-primary transition-all"
+            className="rounded-xl h-11 bg-background border-border focus:border-primary transition-all"
           />
           <PasswordStrengthIndicator password={password} />
         </div>
@@ -94,7 +94,7 @@ export default function ResetPasswordPage() {
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required
-            className="rounded-xl h-11 bg-card/80 border-border focus:border-primary transition-all"
+            className="rounded-xl h-11 bg-background border-border focus:border-primary transition-all"
           />
           {password && confirm && password !== confirm && (
             <p className="text-xs text-destructive font-medium">Passwords do not match</p>

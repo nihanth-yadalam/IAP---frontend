@@ -30,31 +30,52 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-6">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Create account</CardTitle>
-          <p className="text-sm text-zinc-600">Your schedule, personalized — and private.</p>
+    <div className="min-h-screen bg-background flex items-center justify-center p-6 transition-colors duration-300">
+      <Card className="w-full max-w-md shadow-xl border-border/50 bg-card/50 backdrop-blur-sm">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold tracking-tight">Create account</CardTitle>
+          <p className="text-sm text-muted-foreground">Your schedule, personalized — and private.</p>
         </CardHeader>
         <CardContent>
           <form className="space-y-4" onSubmit={onSubmit}>
             <div className="space-y-2">
               <Label>Name</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} required />
+              <Input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="bg-secondary/50 text-slate-900 dark:text-slate-100 placeholder:text-muted-foreground"
+              />
             </div>
             <div className="space-y-2">
               <Label>Email</Label>
-              <Input value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="bg-secondary/50 text-slate-900 dark:text-slate-100 placeholder:text-muted-foreground"
+              />
             </div>
             <div className="space-y-2">
               <Label>Password</Label>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="bg-secondary/50 text-slate-900 dark:text-slate-100 placeholder:text-muted-foreground"
+              />
             </div>
-            {err && <div className="text-sm text-red-600">{err}</div>}
-            <Button className="w-full" disabled={loading}>{loading ? 'Creating...' : 'Create account'}</Button>
+            {err && <div className="text-sm text-destructive font-medium">{err}</div>}
+            <Button className="w-full font-semibold shadow-md" disabled={loading}>
+              {loading ? 'Creating...' : 'Create account'}
+            </Button>
           </form>
-          <div className="mt-4 text-sm">
-            <Link className="text-zinc-700 underline" to="/login">Back to login</Link>
+          <div className="mt-4 text-sm text-center">
+            <span className="text-muted-foreground">Already have an account? </span>
+            <Link className="text-primary font-medium hover:text-primary/80 underline-offset-4 hover:underline transition-colors" to="/login">
+              Sign in
+            </Link>
           </div>
         </CardContent>
       </Card>

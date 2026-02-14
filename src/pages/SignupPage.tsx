@@ -29,21 +29,21 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center px-4 py-8 overflow-hidden">
+    <div className="relative flex min-h-screen items-center justify-center px-4 py-8 overflow-hidden bg-background">
       {/* Theme Toggle */}
       <div className="absolute top-4 right-4 z-50">
         <ThemeToggle />
       </div>
 
       {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-vibrant-orange/20 via-background to-vibrant-pink/20 opacity-40 dark:opacity-20" />
-      <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-gradient-to-br from-vibrant-orange/15 via-background to-vibrant-pink/15 dark:from-vibrant-orange/20 dark:to-vibrant-pink/20" />
+      <div className="absolute inset-0 backdrop-blur-3xl" />
 
       {/* Floating decorative blobs */}
-      <div className="absolute top-16 right-16 w-80 h-80 rounded-full bg-vibrant-pink/30 blur-3xl animate-float" />
-      <div className="absolute bottom-24 left-16 w-72 h-72 rounded-full bg-vibrant-orange/25 blur-3xl animate-float" style={{ animationDelay: "1.5s" }} />
+      <div className="absolute top-16 right-16 w-80 h-80 rounded-full bg-vibrant-pink/20 dark:bg-vibrant-pink/30 blur-3xl animate-float" />
+      <div className="absolute bottom-24 left-16 w-72 h-72 rounded-full bg-vibrant-orange/15 dark:bg-vibrant-orange/25 blur-3xl animate-float" style={{ animationDelay: "1.5s" }} />
 
-      <Card className="relative w-full max-w-md rounded-2xl bg-card text-card-foreground border border-border shadow-xl animate-scale-in max-h-[90vh] overflow-y-auto">
+      <Card className="relative w-full max-w-md rounded-2xl bg-card/95 backdrop-blur-xl text-card-foreground border border-border/50 shadow-xl animate-scale-in max-h-[90vh] overflow-y-auto">
         <CardHeader className="space-y-3 text-center pb-2">
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/30">
             <GraduationCap className="h-7 w-7 text-primary-foreground" />
@@ -70,7 +70,7 @@ export default function SignupPage() {
                   onChange={(e) => setName(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="rounded-xl h-11 bg-card/80 border-border focus:border-primary transition-all"
+                  className="rounded-xl h-11 bg-background border-border focus:border-primary transition-all"
                 />
               </div>
               <div className="space-y-2">
@@ -82,7 +82,7 @@ export default function SignupPage() {
                   onChange={(e) => setUsername(e.target.value)}
                   required
                   disabled={isLoading}
-                  className="rounded-xl h-11 bg-card/80 border-border focus:border-primary transition-all"
+                  className="rounded-xl h-11 bg-background border-border focus:border-primary transition-all"
                 />
               </div>
             </div>
@@ -96,7 +96,7 @@ export default function SignupPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
-                className="rounded-xl h-11 bg-card/80 border-border focus:border-primary transition-all"
+                className="rounded-xl h-11 bg-background border-border focus:border-primary transition-all"
               />
             </div>
             <div className="space-y-2">
@@ -108,7 +108,7 @@ export default function SignupPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
-                className="rounded-xl h-11 bg-card/80 border-border focus:border-primary transition-all"
+                className="rounded-xl h-11 bg-background border-border focus:border-primary transition-all"
               />
               <PasswordStrengthIndicator password={password} />
             </div>
