@@ -12,7 +12,7 @@
 
 ---
 
-## Prerequisites  -- ybb
+## Prerequisites
 
 Make sure you have:
 
