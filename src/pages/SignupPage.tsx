@@ -109,7 +109,8 @@ export default function SignupPage() {
             )}
 
             <Button
-              className="w-full h-11 rounded-xl font-semibold shadow-neon transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
+              variant="default"
+              className="w-full h-11 rounded-xl font-semibold shadow-neon bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]"
               type="submit"
               disabled={isLoading}
             >

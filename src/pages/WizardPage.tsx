@@ -70,26 +70,26 @@ export default function WizardPage() {
     alert("Google Calendar connect is a UI stub in the frontend-only build.");
   }
   return (
-    <div className="min-h-full bg-slate-50 p-6">
+    <div className="min-h-full bg-background p-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-4 flex items-center justify-between">
           <div>
-            <div className="text-xl font-semibold">Quick Setup</div>
-            <div className="text-sm text-slate-600">Step {step + 1} of {steps.length}: {steps[step]}</div>
+            <div className="text-xl font-semibold text-foreground">Quick Setup</div>
+            <div className="text-sm text-muted-foreground">Step {step + 1} of {steps.length}: {steps[step]}</div>
           </div>
-          <div className="text-sm text-slate-600">{progress}%</div>
+          <div className="text-sm text-muted-foreground">{progress}%</div>
         </div>
 
         <Card>
           <CardHeader />
-          <CardContent>
+          <CardContent className="text-card-foreground">
             {step === 0 && (
               <div className="space-y-3">
                 <div className="text-lg font-semibold">Welcome 👋</div>
-                <div className="text-slate-600">
+                <div className="text-muted-foreground">
                   This planner is not just a to-do list. It learns your habits and schedules tasks around your real availability.
                 </div>
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+                <div className="rounded-xl border border-border bg-muted/50 p-3 text-sm text-foreground">
                   You’ll set: <b>baseline preferences</b>, <b>weekly busy slots</b>, and optional <b>Google Calendar sync</b>.
                 </div>
               </div>
@@ -97,7 +97,7 @@ export default function WizardPage() {
 
             {step === 1 && (
               <div className="space-y-3">
-                <div className="text-lg font-semibold">Your profile</div>
+                <div className="text-lg font-semibold text-foreground">Your profile</div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
                     <div className="text-sm mb-1">Name</div>
@@ -117,8 +117,8 @@ export default function WizardPage() {
 
             {step === 2 && (
               <div className="space-y-3">
-                <div className="text-lg font-semibold">Chronotype</div>
-                <div className="text-slate-600">Are you a Morning Lark or a Night Owl?</div>
+                <div className="text-lg font-semibold text-foreground">Chronotype</div>
+                <div className="text-muted-foreground">Are you a Morning Lark or a Night Owl?</div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <ChoiceCard label="Morning Lark" active={chronotype === "morning"} onClick={() => setChronotype("morning")} desc="Best focus early day" />
                   <ChoiceCard label="Balanced" active={chronotype === "balanced"} onClick={() => setChronotype("balanced")} desc="Steady focus through day" />
@@ -130,8 +130,8 @@ export default function WizardPage() {
             {step === 3 && (
               <div className="space-y-4">
                 <div>
-                  <div className="text-lg font-semibold">Attention span</div>
-                  <div className="text-slate-600">Do you prefer deep work or short sprints?</div>
+                  <div className="text-lg font-semibold text-foreground">Attention span</div>
+                  <div className="text-muted-foreground">Do you prefer deep work or short sprints?</div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                   <ChoiceCard label="Deep Work" active={workStyle === "deep"} onClick={() => setWorkStyle("deep")} desc="90–180 min blocks" />
@@ -147,43 +147,43 @@ export default function WizardPage() {
 
             {step === 4 && (
               <div className="space-y-3">
-                <div className="text-lg font-semibold">Weekly busy slots</div>
+                <div className="text-lg font-semibold text-foreground">Weekly busy slots</div>
                 <BusySlotPainter value={busyGrid} onChange={setBusyGrid} />
               </div>
             )}
 
             {step === 5 && (
               <div className="space-y-3">
-                <div className="text-lg font-semibold">Google Calendar</div>
-                <div className="text-slate-600">
+                <div className="text-lg font-semibold text-foreground">Google Calendar</div>
+                <div className="text-muted-foreground">
                   Connect to import existing events as busy slots. Optionally allow writing scheduled tasks back.
                 </div>
                 <div className="flex flex-wrap gap-3 items-center">
-                  <Button onClick={connectGoogle}>Connect Google Calendar</Button>
-                  <label className="flex items-center gap-2 text-sm">
+                  <Button variant="default" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={connectGoogle}>Connect Google Calendar</Button>
+                  <label className="flex items-center gap-2 text-sm text-foreground">
                     <input type="checkbox" checked={calendarWrite} onChange={(e) => setCalendarWrite(e.target.checked)} />
                     Allow writing tasks to my Google Calendar
                   </label>
                 </div>
-                <div className="text-xs text-slate-500">Note: In local demo, Google OAuth is stubbed unless you add keys.</div>
+                <div className="text-xs text-muted-foreground">Note: In local demo, Google OAuth is stubbed unless you add keys.</div>
               </div>
             )}
 
             {step === 6 && (
               <div className="space-y-3">
                 <div className="text-lg font-semibold">You’re all set ✅</div>
-                <div className="text-slate-600">
+                <div className="text-muted-foreground">
                   Go to the home page and click <b>Schedule</b> to add your first exam/assignment.
                 </div>
-                <Button onClick={() => nav("/app")}>Go to Home</Button>
+                <Button variant="default" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={() => nav("/dashboard")}>Go to Home</Button>
               </div>
             )}
 
             <div className="mt-6 flex items-center justify-between">
-              <Button variant="ghost" onClick={back} disabled={step === 0}>Back</Button>
+              <Button variant="outline" className="border-border text-foreground hover:bg-accent hover:text-accent-foreground" onClick={back} disabled={step === 0}>Back</Button>
               <div className="flex items-center gap-2">
                 {step < steps.length - 1 ? (
-                  <Button onClick={next}>{step === steps.length - 2 ? "Finish" : "Next"}</Button>
+                  <Button variant="default" className="bg-primary text-primary-foreground hover:bg-primary/90" onClick={next}>{step === steps.length - 2 ? "Finish" : "Next"}</Button>
                 ) : null}
               </div>
             </div>
@@ -199,10 +199,10 @@ function ChoiceCard({ label, desc, active, onClick }: { label: string; desc: str
     <button
       type="button"
       onClick={onClick}
-      className={`text-left rounded-2xl border p-4 transition ${active ? "border-slate-900 bg-slate-50" : "border-slate-200 bg-white hover:bg-slate-50"}`}
+      className={`text-left rounded-2xl border p-4 transition ${active ? "border-primary bg-primary/10 text-foreground" : "border-border bg-card text-foreground hover:bg-accent/50"}`}
     >
       <div className="font-semibold">{label}</div>
-      <div className="text-sm text-slate-600 mt-1">{desc}</div>
+      <div className="text-sm text-muted-foreground mt-1">{desc}</div>
     </button>
   );
 }

@@ -109,6 +109,27 @@
     border-color: hsl(var(--border));
   }
 
+  /* Ensure input text and autofill are always visible */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    caret-color: hsl(var(--foreground));
+  }
+
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus,
+  .dark input:-webkit-autofill:active {
+    -webkit-text-fill-color: hsl(var(--foreground)) !important;
+    -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
+    caret-color: hsl(var(--foreground));
+  }
+
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
