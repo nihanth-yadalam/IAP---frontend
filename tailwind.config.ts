@@ -98,6 +98,14 @@ const config: Config = {
         "float": {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
+        },
+        "gradient-shift": {
+          "0%, 100%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+        },
+        "shimmer": {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
         }
       },
       animation: {
@@ -108,6 +116,8 @@ const config: Config = {
         "bounce-subtle": "bounce-subtle 2s infinite",
         "pulse-glow": "pulse-glow 3s infinite",
         "float": "float 4s ease-in-out infinite",
+        "gradient-shift": "gradient-shift 3s ease infinite",
+        "shimmer": "shimmer 2s linear infinite",
       },
       boxShadow: {
         'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',

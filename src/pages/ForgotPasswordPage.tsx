@@ -55,6 +55,7 @@ export default function ForgotPasswordPage() {
           {err ? <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg">{err}</div> : null}
           <Button 
             className="w-full h-11 rounded-xl font-semibold shadow-md" 
+            variant="gradient"
             type="submit" 
             disabled={loading}
           >

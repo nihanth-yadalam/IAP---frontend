@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { BusySlotPainter } from "@/components/BusySlotPainter";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type Chronotype = "morning" | "balanced" | "night";
 type WorkStyle = "deep" | "mixed" | "sprints";
@@ -70,7 +71,12 @@ export default function WizardPage() {
     alert("Google Calendar connect is a UI stub in the frontend-only build.");
   }
   return (
-    <div className="min-h-full bg-background p-6">
+    <div className="min-h-full bg-background p-6 relative">
+      {/* Theme Toggle */}
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+
       <div className="max-w-4xl mx-auto">
         <div className="mb-4 flex items-center justify-between">
           <div>

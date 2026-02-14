@@ -53,7 +53,7 @@ export default function ResetPasswordPage() {
             Your password has been reset. You can now sign in with your new password.
           </p>
           <Link to="/login">
-            <Button className="w-full h-11 rounded-xl font-semibold shadow-md">
+            <Button variant="gradient" className="w-full h-11 rounded-xl font-semibold shadow-md">
               Sign in
             </Button>
           </Link>
@@ -104,6 +104,7 @@ export default function ResetPasswordPage() {
         <Button
           type="submit"
           disabled={loading || !validatePassword(password) || password !== confirm}
+          variant="gradient"
           className="w-full h-11 rounded-xl font-semibold shadow-md"
         >
           {loading ? "Resetting…" : "Reset password"}

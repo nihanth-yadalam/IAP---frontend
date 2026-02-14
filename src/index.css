@@ -219,6 +219,24 @@
     height: 3px;
     background: linear-gradient(90deg, hsl(var(--vibrant-purple)), hsl(var(--vibrant-cyan)));
   }
+
+  /* Smooth scrollbar for auth modals */
+  .max-h-\[90vh\]::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .max-h-\[90vh\]::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .max-h-\[90vh\]::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 10px;
+  }
+  
+  .max-h-\[90vh\]::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
 }
 
 /* RBC overrides adapted for Vibrant theme */
