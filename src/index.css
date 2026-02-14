@@ -130,6 +130,10 @@
     caret-color: hsl(var(--foreground));
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
@@ -146,11 +150,13 @@
 }
 
 @layer utilities {
+
   /* Force profile/account dropdown to be solid white (no transparency) */
   .dropdown-solid-bg {
     background-color: #ffffff !important;
     opacity: 1 !important;
   }
+
   .dark .dropdown-solid-bg {
     background-color: #18181b !important;
     opacity: 1 !important;
@@ -229,7 +235,7 @@
 
 .rbc-time-view,
 .rbc-month-view {
-  border: none !important;
+  border: 1px solid hsla(var(--border), 0.8) !important;
   background: transparent !important;
 }
 
@@ -251,4 +257,157 @@
 
 .rbc-time-content>*+*>* {
   border-left: 1px solid hsla(var(--border), 0.5) !important;
+}
+
+/* Extra RBC gridline + motion polish */
+.rbc-time-header {
+  border-bottom: 1px solid hsla(var(--border), 0.7) !important;
+}
+
+.rbc-time-header-content {
+  border-left: 1px solid hsla(var(--border), 0.7) !important;
+}
+
+.rbc-time-content {
+  border-top: 1px solid hsla(var(--border), 0.7) !important;
+}
+
+.rbc-time-content .rbc-time-slot {
+  transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.rbc-time-content .rbc-time-slot:hover {
+  background-color: hsla(var(--vibrant-purple), 0.06) !important;
+}
+
+.rbc-event {
+  transition: transform 160ms ease, filter 160ms ease;
+}
+
+.rbc-event:hover {
+  transform: translateY(-1px) scale(1.01);
+  filter: brightness(1.02);
+}
+
+/* Month view gridlines */
+.rbc-month-row+.rbc-month-row {
+  border-top: 1px solid hsla(var(--border), 0.7) !important;
+}
+
+.rbc-day-bg+.rbc-day-bg {
+  border-left: 1px solid hsla(var(--border), 0.7) !important;
+}
+
+.rbc-month-view .rbc-date-cell {
+  padding: 6px 8px !important;
+}
+
+.rbc-off-range-bg {
+  background-color: hsla(var(--muted), 0.45) !important;
+}
+
+/* ==============================
+   React Big Calendar — Gridlines Fix (FINAL)
+   ============================== */
+
+/* ---- WEEK/DAY: remove header "boxed strip" ---- */
+.rbc-time-header,
+.rbc-time-header-gutter,
+.rbc-time-header-content {
+  border: 0 !important;
+}
+
+/* Day-name header cells should have subtle vertical separators only */
+.rbc-time-header .rbc-header+.rbc-header {
+  border-left: 1px solid rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Dark mode header separators */
+.dark .rbc-time-header .rbc-header+.rbc-header {
+  border-left: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+/* ---- WEEK/DAY gridlines (time grid area only) ---- */
+.rbc-time-content {
+  border-top: 1px solid rgba(0, 0, 0, 0.18) !important;
+}
+
+.rbc-time-content>*+* {
+  border-left: 1px solid rgba(0, 0, 0, 0.18) !important;
+}
+
+.rbc-timeslot-group {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.18) !important;
+}
+
+.rbc-time-slot {
+  border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Dark mode week/day gridlines */
+.dark .rbc-time-content {
+  border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+.dark .rbc-time-content>*+* {
+  border-left: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+.dark .rbc-timeslot-group {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+.dark .rbc-time-slot {
+  border-top: 1px solid rgba(255, 255, 255, 0.10) !important;
+}
+
+/* ==============================
+   React Big Calendar — MONTH view gridlines (FINAL)
+   ============================== */
+
+.rbc-month-view {
+  border: 1px solid rgba(0, 0, 0, 0.18) !important;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Month header separator (Sun..Sat) */
+.rbc-month-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Vertical day separators */
+.rbc-row-bg .rbc-day-bg+.rbc-day-bg {
+  border-left: 1px solid rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Horizontal week separators */
+.rbc-month-row+.rbc-month-row {
+  border-top: 1px solid rgba(0, 0, 0, 0.18) !important;
+}
+
+/* Cell background (subtle) */
+.rbc-day-bg {
+  background: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Dark mode month view */
+.dark .rbc-month-view {
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+.dark .rbc-month-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+.dark .rbc-row-bg .rbc-day-bg+.rbc-day-bg {
+  border-left: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+.dark .rbc-month-row+.rbc-month-row {
+  border-top: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+.dark .rbc-day-bg {
+  background: rgba(0, 0, 0, 0.18) !important;
 }
