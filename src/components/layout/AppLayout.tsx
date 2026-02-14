@@ -15,6 +15,10 @@ import { User, Settings, LogOut, Moon, Sun, Sunrise, Sunset } from "lucide-react
 import { useTheme } from "@/components/theme-provider";
 import { Link } from "react-router-dom";
 
+import morningAvatar from "@/assets/avatars/morning.svg";
+import balancedAvatar from "@/assets/avatars/balanced.svg";
+import nightAvatar from "@/assets/avatars/night.svg";
+
 export function AppLayout() {
     const { user, logout } = useAuthStore();
     const { setTheme, theme } = useTheme();
@@ -43,7 +47,10 @@ export function AppLayout() {
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="relative h-9 w-9 rounded-full ring-2 ring-border hover:ring-primary/30 transition-all active:scale-95">
                                     <Avatar className="h-9 w-9">
-                                        <AvatarImage src={user?.avatar_url} alt={user?.username} />
+                                        <AvatarImage
+                                            src={user?.avatar_url || (user?.chronotype === "morning" ? morningAvatar : user?.chronotype === "night" ? nightAvatar : balancedAvatar)}
+                                            alt={user?.username}
+                                        />
                                         <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm flex items-center justify-center">
                                             {user?.chronotype === "morning" ? <Sunrise className="h-5 w-5" /> : user?.chronotype === "night" ? <Sunset className="h-5 w-5" /> : (user?.username?.substring(0, 2).toUpperCase() || "U")}
                                         </AvatarFallback>
