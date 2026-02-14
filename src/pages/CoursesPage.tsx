@@ -90,7 +90,7 @@ export default function CoursesPage() {
                     {courses.map((course, i) => (
                         <Card
                             key={course.id}
-                            className="group relative overflow-hidden rounded-2xl border-border/50 glass-card hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-0.5 animate-fade-in"
+                            className="group relative overflow-hidden rounded-2xl border-border/50 bg-card hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-0.5 animate-fade-in"
                             style={{ animationDelay: `${i * 50}ms` }}
                         >
                             {/* Gradient accent strip */}

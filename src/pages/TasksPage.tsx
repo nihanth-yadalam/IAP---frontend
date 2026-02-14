@@ -120,7 +120,7 @@ export default function TasksPage() {
                     {filteredTasks.map((task, i) => (
                         <Card
                             key={task.id}
-                            className="group relative overflow-hidden rounded-2xl border-border/50 glass-card hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-0.5 animate-fade-in"
+                            className="group relative overflow-hidden rounded-2xl border-border/50 bg-card border-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-0.5 animate-fade-in"
                             style={{ animationDelay: `${i * 40}ms` }}
                         >
                             <CardHeader className="pb-3">

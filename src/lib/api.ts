@@ -238,11 +238,30 @@ async function handle(method: HttpMethod, path: string, body?: any): Promise<Api
     const u = users.find(x => x.id === userId);
     if (!u) throw { response: { data: { detail: "User not found" } } };
     const profile = getProfileMap()[userId] ?? {};
-    return ok({ id: u.id, email: u.email, username: u.username, name: profile.name ?? u.name ?? null });
+    return ok({
+      id: u.id,
+      email: u.email,
+      username: u.username,
+      name: profile.name ?? u.name ?? null,
+      chronotype: profile.chronotype ?? "balanced",
+    });
   }
 
   if (method === "POST" && path === "/auth/forgot-password") {
     // UI-only stub; in real app, send email
+    return ok({ ok: true });
+  }
+  if (method === "POST" && path === "/auth/forgot") {
+    return ok({ ok: true });
+  }
+  if (method === "POST" && path === "/auth/reset-password") {
+    const { token, new_password } = body ?? {};
+    if (!token || !new_password) throw { response: { data: { detail: "Token and new password required" } } };
+    // Mock: accept any token and update password for first user (demo only)
+    const users = getAllUsers();
+    if (users.length === 0) throw { response: { data: { detail: "Invalid or expired token" } } };
+    users[0].password = new_password;
+    saveUsers(users);
     return ok({ ok: true });
   }
 

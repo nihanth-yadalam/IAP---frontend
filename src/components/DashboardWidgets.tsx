@@ -22,7 +22,7 @@ export function DashboardWidgets({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
       {/* Next Up Widget */}
-      <Card className="group relative overflow-hidden rounded-2xl border-border/50 hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5 glass-card">
+      <Card className="group relative overflow-hidden rounded-2xl border-border/50 hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5 bg-card">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-vibrant-purple to-vibrant-blue rounded-t-2xl" />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-5">
           <CardTitle className="text-sm font-medium text-muted-foreground">Next Up</CardTitle>
@@ -46,7 +46,7 @@ export function DashboardWidgets({
       </Card>
 
       {/* Daily Progress Widget */}
-      <Card className="group relative overflow-hidden rounded-2xl border-border/50 hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5 glass-card">
+      <Card className="group relative overflow-hidden rounded-2xl border-border/50 hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5 bg-card">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-vibrant-blue to-vibrant-cyan rounded-t-2xl" />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-5">
           <CardTitle className="text-sm font-medium text-muted-foreground">Daily Progress</CardTitle>
@@ -67,7 +67,7 @@ export function DashboardWidgets({
       </Card>
 
       {/* Energy Level */}
-      <Card className="group relative overflow-hidden rounded-2xl border-border/50 hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5 glass-card">
+      <Card className="group relative overflow-hidden rounded-2xl border-border/50 hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5 bg-card">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-vibrant-orange to-vibrant-pink rounded-t-2xl" />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-5">
           <CardTitle className="text-sm font-medium text-muted-foreground">Energy Level</CardTitle>
@@ -82,7 +82,7 @@ export function DashboardWidgets({
       </Card>
 
       {/* Streak Widget */}
-      <Card className="group relative overflow-hidden rounded-2xl border-border/50 hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5 glass-card">
+      <Card className="group relative overflow-hidden rounded-2xl border-border/50 hover:shadow-card-hover transition-all duration-300 hover:-translate-y-0.5 bg-card">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-vibrant-green to-vibrant-cyan rounded-t-2xl" />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-5">
           <CardTitle className="text-sm font-medium text-muted-foreground">Streak</CardTitle>

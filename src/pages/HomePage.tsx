@@ -87,7 +87,7 @@ export default function HomePage() {
       {/* Main Dashboard Content */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Recent Tasks */}
-        <Card className="md:col-span-2 rounded-2xl border-border/50 shadow-sm glass-card">
+        <Card className="md:col-span-2 rounded-2xl border-border/50 shadow-sm bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <ClipboardList className="h-5 w-5 text-primary" />
@@ -154,7 +154,7 @@ export default function HomePage() {
         </Card>
 
         {/* Side Panel */}
-        <Card className="rounded-2xl border-border/50 shadow-sm glass-card">
+        <Card className="rounded-2xl border-border/50 shadow-sm bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
               <CalendarIcon className="h-5 w-5 text-primary" />

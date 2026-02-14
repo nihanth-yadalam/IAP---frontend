@@ -16,7 +16,7 @@ export default function ForgotPasswordPage() {
     setErr(null);
     setLoading(true);
     try {
-      await api.post("/auth/forgot", { email });
+      await api.post("/auth/forgot-password", { email });
       setSent(true);
     } catch (e: any) {
       setErr(e?.response?.data?.detail ?? "Failed to send reset email");
@@ -35,17 +35,18 @@ export default function ForgotPasswordPage() {
       }
     >
       {sent ? (
-        <div className="space-y-3">
-          <div className="text-sm text-slate-700">
+        <div className="space-y-3 text-foreground">
+          <p className="text-sm text-muted-foreground">
             If an account exists for <b>{email}</b>, you’ll receive a reset email (demo mode logs to backend console).
-          </div>
-          <Link className="underline text-slate-900" to="/login">Return to login</Link>
+          </p>
+          <Link to="/reset-password?token=demo" className="text-primary font-medium hover:underline block">Set new password (demo)</Link>
+          <Link to="/login" className="text-muted-foreground hover:text-foreground text-sm">Return to login</Link>
         </div>
       ) : (
         <form className="space-y-3" onSubmit={onSubmit}>
-          <Input placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          {err ? <div className="text-sm text-red-600">{err}</div> : null}
-          <Button className="w-full" type="submit" disabled={loading}>
+          <Input placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="bg-card text-foreground border-border" />
+          {err ? <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg">{err}</div> : null}
+          <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl active:scale-[0.98]" type="submit" disabled={loading}>
             {loading ? "Sending…" : "Send reset link"}
           </Button>
         </form>

@@ -8,6 +8,7 @@ interface User {
     username: string
     name?: string | null
     avatar_url?: string
+    chronotype?: "morning" | "balanced" | "night"
 }
 
 interface AuthState {

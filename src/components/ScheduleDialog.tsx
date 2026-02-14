@@ -74,15 +74,15 @@ export default function ScheduleDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[550px] rounded-2xl bg-card border-border/50 glass-card">
-        <DialogHeader>
-          <DialogTitle className="text-xl">{taskToEdit ? "Edit Task" : "Schedule Task"}</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="sm:max-w-[550px] max-h-[90vh] flex flex-col rounded-2xl bg-card text-card-foreground border border-border shadow-xl overflow-hidden">
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="text-xl text-foreground">{taskToEdit ? "Edit Task" : "Schedule Task"}</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
             {taskToEdit ? "Update the details of your task." : "Add a new task, assignment, or exam."}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid gap-5 py-4">
+        <div className="grid gap-5 py-4 overflow-y-auto flex-1 min-h-0">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Category</Label>
@@ -145,9 +145,9 @@ export default function ScheduleDialog({
           {err && <div className="text-sm font-medium text-destructive bg-destructive/10 px-3 py-2 rounded-lg animate-fade-in">{err}</div>}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl">Cancel</Button>
-          <Button onClick={handleSubmit} disabled={isLoading || !title || !date} className="rounded-xl shadow-neon transition-all hover:-translate-y-0.5">
+        <DialogFooter className="flex-shrink-0 border-t border-border pt-4">
+          <Button variant="outline" className="rounded-xl border-border text-foreground hover:bg-accent" onClick={() => onOpenChange(false)}>Cancel</Button>
+          <Button variant="default" className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 active:scale-[0.98] transition-transform" onClick={handleSubmit} disabled={isLoading || !title || !date}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save
           </Button>

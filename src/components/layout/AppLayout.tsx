@@ -11,7 +11,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { User, Settings, LogOut, Moon, Sun } from "lucide-react";
+import { User, Settings, LogOut, Moon, Sun, Sunrise, Sunset } from "lucide-react";
 import { useTheme } from "@/components/theme-provider";
 import { Link } from "react-router-dom";
 
@@ -41,30 +41,30 @@ export function AppLayout() {
                         {/* Profile Dropdown */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="relative h-9 w-9 rounded-full ring-2 ring-border hover:ring-primary/30 transition-all">
+                                <Button variant="ghost" className="relative h-9 w-9 rounded-full ring-2 ring-border hover:ring-primary/30 transition-all active:scale-95">
                                     <Avatar className="h-9 w-9">
                                         <AvatarImage src={user?.avatar_url} alt={user?.username} />
-                                        <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm">
-                                            {user?.username?.substring(0, 2).toUpperCase() || "U"}
+                                        <AvatarFallback className="bg-primary/10 text-primary font-semibold text-sm flex items-center justify-center">
+                                            {user?.chronotype === "morning" ? <Sunrise className="h-5 w-5" /> : user?.chronotype === "night" ? <Sunset className="h-5 w-5" /> : (user?.username?.substring(0, 2).toUpperCase() || "U")}
                                         </AvatarFallback>
                                     </Avatar>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent className="w-56 rounded-xl shadow-glass" align="end" forceMount>
-                                <DropdownMenuLabel className="font-normal">
+                            <DropdownMenuContent className="w-56 rounded-xl border border-zinc-200 text-zinc-900 shadow-xl dropdown-solid-bg dark:border-zinc-700 dark:text-zinc-100" align="end" forceMount>
+                                <DropdownMenuLabel className="font-normal text-zinc-900 dark:text-zinc-100">
                                     <div className="flex flex-col space-y-1">
                                         <p className="text-sm font-semibold leading-none capitalize">{user?.username}</p>
-                                        <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                                        <p className="text-xs leading-none text-zinc-500 dark:text-zinc-400">{user?.email}</p>
                                     </div>
                                 </DropdownMenuLabel>
                                 <DropdownMenuSeparator />
-                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer text-zinc-900 focus:bg-zinc-100 focus:text-zinc-900 dark:text-zinc-100 dark:focus:bg-zinc-800 dark:focus:text-zinc-100">
                                     <Link to="/settings">
                                         <User className="mr-2 h-4 w-4" />
                                         <span>Profile</span>
                                     </Link>
                                 </DropdownMenuItem>
-                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
+                                <DropdownMenuItem asChild className="rounded-lg cursor-pointer text-zinc-900 focus:bg-zinc-100 focus:text-zinc-900 dark:text-zinc-100 dark:focus:bg-zinc-800 dark:focus:text-zinc-100">
                                     <Link to="/settings">
                                         <Settings className="mr-2 h-4 w-4" />
                                         <span>Settings</span>

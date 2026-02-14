@@ -146,6 +146,16 @@
 }
 
 @layer utilities {
+  /* Force profile/account dropdown to be solid white (no transparency) */
+  .dropdown-solid-bg {
+    background-color: #ffffff !important;
+    opacity: 1 !important;
+  }
+  .dark .dropdown-solid-bg {
+    background-color: #18181b !important;
+    opacity: 1 !important;
+  }
+
   .glass {
     background: rgba(255, 255, 255, 0.65);
     backdrop-filter: blur(16px);
