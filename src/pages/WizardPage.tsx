@@ -303,7 +303,6 @@ function StepContent({ step, data, setters }: any) {
               onClick={() => setters.setChronotype("morning")}
               title="Early Bird"
               desc="I focus best in the mornings (6AM - 11AM)."
-              icon="🌅"
             />
             <SelectableCard
               selected={data.chronotype === "balanced"}
