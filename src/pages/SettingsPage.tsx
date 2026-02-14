@@ -8,7 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BusySlotPainter } from "@/components/BusySlotPainter";
-import { Loader2, User, Clock, Link as LinkIcon, Calendar, Settings2 } from "lucide-react";
+import { Loader2, User, Clock, Link as LinkIcon, Calendar, Settings2, Shield } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function SettingsPage() {
     const { user } = useAuthStore();
@@ -162,6 +163,55 @@ export default function SettingsPage() {
                             </div>
                         </CardContent>
                     </Card>
+
+
+                    {/* Account Security */}
+                    <Card className="rounded-2xl border-border/50">
+                        <CardHeader>
+                            <CardTitle className="text-lg flex items-center gap-2"><Shield className="h-5 w-5 text-primary" /> Account Security</CardTitle>
+                            <CardDescription>Manage password and sign-in methods.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 rounded-xl border border-border/60 bg-accent/20 p-4">
+                                <div>
+                                    <p className="font-medium">Reset password</p>
+                                    <p className="text-sm text-muted-foreground">Change your password securely.</p>
+                                </div>
+                                <Button asChild className="rounded-xl">
+                                    <Link to="/reset-password">Reset Password</Link>
+                                </Button>
+                            </div>
+
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 rounded-xl border border-dashed border-border/60 bg-accent/10 p-4">
+                                <div>
+                                    <p className="font-medium">Passkeys (WebAuthn)</p>
+                                    <p className="text-sm text-muted-foreground">Use device biometrics instead of passwords (UI stub).</p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    className="rounded-xl"
+                                    onClick={() => alert("Passkey setup needs WebAuthn + backend support. This is a frontend-only stub.")}
+                                >
+                                    Set up passkey
+                                </Button>
+                            </div>
+
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 rounded-xl border border-dashed border-border/60 bg-accent/10 p-4">
+                                <div>
+                                    <p className="font-medium">Google sign-in</p>
+                                    <p className="text-sm text-muted-foreground">Sign in faster with Google (UI stub).</p>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    className="rounded-xl"
+                                    onClick={() => alert("Google OAuth needs backend configuration. This is a frontend-only stub.")}
+                                >
+                                    Connect Google
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+
                 </TabsContent>
 
                 <TabsContent value="schedule" className="space-y-6 animate-fade-in">

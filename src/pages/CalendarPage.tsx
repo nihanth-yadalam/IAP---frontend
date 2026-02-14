@@ -43,7 +43,7 @@ export default function CalendarPage() {
                 </Button>
             </div>
 
-            <div className="flex-1 min-h-0 rounded-2xl border border-border/50 bg-card p-4 shadow-sm">
+            <div className="flex-1 min-h-0 rounded-2xl border border-border/50 bg-card p-4 shadow-sm animate-fade-in">
                 <CalendarView
                     tasks={tasks}
                     onSelectTask={handleTaskSelect}
