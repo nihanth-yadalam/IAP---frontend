@@ -1,13 +1,8 @@
 import { ReactNode } from "react";
 import { ThemeToggle } from "./ThemeToggle";
+
 import { GraduationCap } from "lucide-react";
 
-// ... inside component ...
-{/* Branding Content */ }
-<div className="relative z-20 flex items-center text-lg font-medium">
-    <GraduationCap className="mr-2 h-6 w-6" />
-    Schedora
-</div>
 
 interface AuthLayoutProps {
     children: ReactNode;
