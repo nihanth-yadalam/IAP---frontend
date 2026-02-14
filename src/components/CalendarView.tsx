@@ -13,7 +13,7 @@ type Task = {
 };
 
 const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-const HOURS = Array.from({ length: 12 }, (_, i) => i + 8); // 8..19
+const HALF_HOURS = Array.from({ length: 24 }, (_, i) => ({ h: 8 + Math.floor(i / 2), m: i % 2 === 0 ? 0 : 30 })); // 08:00 .. 19:30
 
 function dayIndex(d: Date) {
   // Monday=0 .. Sunday=6
@@ -28,7 +28,10 @@ export default function CalendarView({ tasks }: { tasks: Task[] }) {
       .map(t => {
         const s = new Date(t.planned_start!);
         const e = new Date(t.planned_end!);
-        return { t, d: dayIndex(s), sh: s.getHours(), eh: e.getHours() + (e.getMinutes() > 0 ? 1 : 0) };
+        function idx(dt: Date) { return (dt.getHours() - 8) * 2 + (dt.getMinutes() >= 30 ? 1 : 0); }
+        const sh = idx(s);
+        const eh = Math.max(sh + 1, idx(e));
+        return { t, d: dayIndex(s), sh, eh };
       });
   }, [tasks]);
 
@@ -40,13 +43,13 @@ export default function CalendarView({ tasks }: { tasks: Task[] }) {
           {DAYS.map(d => <div key={d} className="p-2 text-xs font-medium text-slate-700">{d}</div>)}
         </div>
 
-        {HOURS.map(h => (
+        {HALF_HOURS.map(({ h, m }, rowIdx) => (
           <div key={h} className="grid grid-cols-[80px_repeat(7,1fr)] border-b border-slate-100">
-            <div className="p-2 text-xs text-slate-500">{h}:00</div>
+            <div className="p-2 text-xs text-slate-500">{String(h).padStart(2, "0")}:{m === 0 ? "00" : "30"}</div>
             {Array.from({length:7},(_,d)=>d).map(d => {
-              const slotTasks = blocks.filter(b => b.d === d && b.sh <= h && b.eh > h);
+              const slotTasks = blocks.filter(b => b.d === d && b.sh <= rowIdx && b.eh > rowIdx);
               return (
-                <div key={`${d}-${h}`} className="h-14 border-l border-slate-100 relative">
+                <div key={`${d}-${h}`} className="h-10 border-l border-slate-100 relative">
                   {slotTasks.slice(0,1).map(({t}) => (
                     <div
                       key={t.id}
