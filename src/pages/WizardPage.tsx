@@ -303,6 +303,7 @@ function StepContent({ step, data, setters }: any) {
               onClick={() => setters.setChronotype("morning")}
               title="Early Bird"
               desc="I focus best in the mornings (6AM - 11AM)."
+              icon="🌅"
             />
             <SelectableCard
               selected={data.chronotype === "balanced"}
@@ -404,9 +405,6 @@ function StepContent({ step, data, setters }: any) {
                 {data.calendarWrite ? "Connected" : "Connect"}
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground bg-yellow-500/10 text-yellow-600 p-3 rounded-md border border-yellow-500/20">
-              ⚠️ Note: This is a frontend-only demo. OAuth flow is simulated.
-            </p>
           </div>
         </div>
       );

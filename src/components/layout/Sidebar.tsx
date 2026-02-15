@@ -40,7 +40,7 @@ function SidebarBrand({ collapsed }: { collapsed: boolean }) {
                 <GraduationCap className="h-5 w-5" />
             </div>
             {!collapsed && (
-                <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-primary to-vibrant-purple bg-clip-text text-transparent animate-fade-in">
+                <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-primary to-vibrant-purple bg-clip-text animate-fade-in">
                     Schedora
                 </span>
             )}
