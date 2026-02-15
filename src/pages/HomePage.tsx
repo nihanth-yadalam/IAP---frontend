@@ -5,9 +5,9 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { DashboardWidgets } from "@/components/DashboardWidgets";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, BookOpen, Calendar as CalendarIcon, ArrowRight, Sparkles, ClipboardList } from "lucide-react";
+import { Plus, BookOpen, Calendar as CalendarIcon, ArrowRight, Sparkles, ClipboardList, Clock } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { format } from "date-fns";
+import { format, formatDistanceToNow, isToday, isTomorrow } from "date-fns";
 
 export default function HomePage() {
   const { tasks, fetchTasks, isLoading } = useTaskStore();
@@ -153,7 +153,7 @@ export default function HomePage() {
           </CardContent>
         </Card>
 
-        {/* Side Panel */}
+        {/* Side Panel — Schedule Snapshot */}
         <Card className="rounded-2xl border-border/50 shadow-sm bg-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -163,12 +163,66 @@ export default function HomePage() {
             <CardDescription>Coming up next on your calendar.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex h-[200px] items-center justify-center rounded-xl border border-dashed border-border/60 bg-accent/20">
-              <div className="text-center space-y-2">
-                <CalendarIcon className="h-8 w-8 mx-auto text-muted-foreground/40" />
-                <p className="text-sm text-muted-foreground">No events scheduled soon</p>
-              </div>
-            </div>
+            {(() => {
+              const now = new Date();
+              const upcoming = tasks
+                .filter(t => t.status === "pending" && new Date(t.deadline).getTime() > now.getTime())
+                .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime())
+                .slice(0, 5);
+
+              if (upcoming.length === 0) {
+                return (
+                  <div className="flex h-[200px] items-center justify-center rounded-xl border border-dashed border-border/60 bg-accent/20">
+                    <div className="text-center space-y-2">
+                      <CalendarIcon className="h-8 w-8 mx-auto text-muted-foreground/40" />
+                      <p className="text-sm text-muted-foreground">No upcoming tasks</p>
+                    </div>
+                  </div>
+                );
+              }
+
+              const categoryColors: Record<string, string> = {
+                exam: "bg-vibrant-pink/15 text-vibrant-pink",
+                assignment: "bg-vibrant-blue/15 text-vibrant-blue",
+                extra: "bg-vibrant-purple/15 text-vibrant-purple",
+              };
+
+              function timeLabel(deadline: string) {
+                const d = new Date(deadline);
+                if (isToday(d)) return `Today, ${format(d, "h:mm a")}`;
+                if (isTomorrow(d)) return `Tomorrow, ${format(d, "h:mm a")}`;
+                return format(d, "MMM d, h:mm a");
+              }
+
+              return (
+                <ScrollArea className="h-[220px] pr-2">
+                  <div className="space-y-2.5">
+                    {upcoming.map((task, i) => (
+                      <div
+                        key={task.id}
+                        className="flex items-start gap-3 rounded-xl border border-border/50 p-3 hover:bg-accent/30 transition-colors animate-fade-in"
+                        style={{ animationDelay: `${i * 60}ms` }}
+                      >
+                        <div className="mt-0.5 shrink-0 h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <Clock className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <p className="font-medium text-sm leading-tight truncate">{task.title}</p>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide ${categoryColors[task.category] || "bg-secondary text-secondary-foreground"}`}>
+                              {task.category}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {timeLabel(task.deadline)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              );
+            })()}
             <Link to="/calendar">
               <Button variant="outline" className="w-full rounded-xl hover:bg-primary/5 hover:border-primary/30 transition-colors">
                 Open Calendar

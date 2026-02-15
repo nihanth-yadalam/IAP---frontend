@@ -1,5 +1,5 @@
 import * as React from "react"
-import { format } from "date-fns"
+import { format, startOfDay } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -15,9 +15,12 @@ interface DatePickerProps {
     date?: Date
     setDate: (date?: Date) => void
     placeholder?: string
+    disablePast?: boolean
 }
 
-export function DatePicker({ date, setDate, placeholder = "Pick a date" }: DatePickerProps) {
+export function DatePicker({ date, setDate, placeholder = "Pick a date", disablePast = true }: DatePickerProps) {
+    const today = startOfDay(new Date());
+
     return (
         <Popover>
             <PopoverTrigger asChild>
@@ -37,6 +40,7 @@ export function DatePicker({ date, setDate, placeholder = "Pick a date" }: DateP
                     mode="single"
                     selected={date}
                     onSelect={setDate}
+                    disabled={disablePast ? { before: today } : undefined}
                     initialFocus
                 />
             </PopoverContent>

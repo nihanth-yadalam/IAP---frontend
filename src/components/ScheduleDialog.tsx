@@ -31,7 +31,8 @@ export default function ScheduleDialog({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [time, setTime] = useState("23:59");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("23:59");
   const [courseId, setCourseId] = useState("other");
   const [err, setErr] = useState<string | null>(null);
 
@@ -46,23 +47,64 @@ export default function ScheduleDialog({
       if (taskToEdit.deadline) {
         const d = new Date(taskToEdit.deadline);
         setDate(d);
-        setTime(format(d, "HH:mm"));
+        setEndTime(format(d, "HH:mm"));
+      }
+      if (taskToEdit.planned_start) {
+        const s = new Date(taskToEdit.planned_start);
+        setStartTime(format(s, "HH:mm"));
+      } else {
+        setStartTime("");
       }
       setCourseId(taskToEdit.course_id || "other");
     } else {
       setTitle(""); setDescription(""); setCategory("assignment");
-      setPriority("medium"); setDate(undefined); setTime("23:59"); setCourseId("other");
+      setPriority("medium"); setDate(undefined); setStartTime(""); setEndTime("23:59"); setCourseId("other");
     }
+    setErr(null);
   }, [taskToEdit, open]);
 
   async function handleSubmit() {
     setErr(null);
-    if (!title || !date) return;
+    if (!title.trim()) { setErr("Title is required."); return; }
+    if (!date) { setErr("Due date is required."); return; }
+
+    // Build deadline datetime
+    const deadline = new Date(date);
+    const [eh, em] = endTime.split(":").map(Number);
+    deadline.setHours(eh, em, 0, 0);
+
+    // Validate: deadline must not be in the past
+    if (deadline.getTime() < Date.now()) {
+      setErr("Deadline cannot be in the past.");
+      return;
+    }
+
+    // Build planned_start if provided
+    let planned_start: string | undefined;
+    if (startTime) {
+      const start = new Date(date);
+      const [sh, sm] = startTime.split(":").map(Number);
+      start.setHours(sh, sm, 0, 0);
+
+      if (start.getTime() < Date.now()) {
+        setErr("Start time cannot be in the past.");
+        return;
+      }
+      if (start.getTime() >= deadline.getTime()) {
+        setErr("Start time must be before the deadline.");
+        return;
+      }
+      planned_start = start.toISOString();
+    }
+
     try {
-      const combined = new Date(date);
-      const [h, m] = time.split(":").map(Number);
-      combined.setHours(h, m, 0, 0);
-      const payload = { category, priority, title, description, deadline: combined.toISOString() };
+      const payload: any = {
+        category, priority, title: title.trim(), description: description.trim(),
+        deadline: deadline.toISOString(),
+      };
+      if (planned_start) payload.planned_start = planned_start;
+      if (courseId !== "other") payload.course_id = courseId;
+
       if (taskToEdit) { await updateTask(taskToEdit.id, payload); }
       else { await addTask(payload); }
       onOpenChange(false);
@@ -127,32 +169,36 @@ export default function ScheduleDialog({
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Task title" className="rounded-xl h-11" />
           </div>
 
-          {/* Row 3: Due Date, Time, Description */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Due Date</Label>
-                <DatePicker date={date} setDate={setDate} />
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Time</Label>
-                <Input type="time" value={time} onChange={(e) => setTime(e.target.value)} className="rounded-xl h-11" />
-              </div>
+          {/* Row 3: Date, Start Time, End Time */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Due Date</Label>
+              <DatePicker date={date} setDate={setDate} disablePast />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Description</Label>
-              <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Add details..." className="rounded-xl resize-none h-[108px]" />
+              <Label className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Start Time</Label>
+              <Input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} className="rounded-xl h-10" placeholder="Optional" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Deadline Time</Label>
+              <Input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} className="rounded-xl h-10" />
             </div>
           </div>
 
-          {err && <div className="text-sm font-medium text-destructive bg-destructive/10 px-3 py-2 rounded-lg animate-fade-in">{err}</div>}
+          {/* Row 4: Description */}
+          <div className="space-y-2">
+            <Label className="text-xs font-semibold uppercase tracking-wider text-foreground/70">Description</Label>
+            <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Add details..." className="rounded-xl resize-none h-24" />
+          </div>
+
+          {err && <div className="text-sm font-medium text-destructive bg-destructive/10 px-3 py-2 rounded-lg">{err}</div>}
         </div>
 
         <DialogFooter className="border-t border-border pt-4">
           <Button variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button className="rounded-xl" onClick={handleSubmit} disabled={isLoading || !title || !date}>
+          <Button className="rounded-xl" onClick={handleSubmit} disabled={isLoading || !title.trim() || !date}>
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save
+            {taskToEdit ? "Update" : "Save"}
           </Button>
         </DialogFooter>
       </DialogContent>
