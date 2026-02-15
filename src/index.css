@@ -163,14 +163,16 @@
 
 @layer utilities {
 
-  /* Force profile/account dropdown to be solid white (no transparency) */
+  /* Force profile/account dropdown to be solid & readable */
   .dropdown-solid-bg {
     background-color: #ffffff !important;
+    color: #18181b !important;
     opacity: 1 !important;
   }
 
   .dark .dropdown-solid-bg {
     background-color: #18181b !important;
+    color: #fafafa !important;
     opacity: 1 !important;
   }
 
@@ -220,22 +222,29 @@
     background: linear-gradient(90deg, hsl(var(--vibrant-purple)), hsl(var(--vibrant-cyan)));
   }
 
-  /* Smooth scrollbar for auth modals */
-  .max-h-\[90vh\]::-webkit-scrollbar {
+  /* Global Custom Scrollbar */
+  ::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
   }
-  
-  .max-h-\[90vh\]::-webkit-scrollbar-track {
+
+  ::-webkit-scrollbar-track {
     background: transparent;
   }
-  
-  .max-h-\[90vh\]::-webkit-scrollbar-thumb {
+
+  ::-webkit-scrollbar-thumb {
     background: hsl(var(--border));
-    border-radius: 10px;
+    border-radius: 99px;
   }
-  
-  .max-h-\[90vh\]::-webkit-scrollbar-thumb:hover {
+
+  ::-webkit-scrollbar-thumb:hover {
     background: hsl(var(--muted-foreground));
+  }
+
+  /* Firefox support */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
   }
 }
 

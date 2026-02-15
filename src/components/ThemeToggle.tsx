@@ -31,14 +31,15 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      className="rounded-full bg-background/95 border border-border shadow-sm hover:shadow-md transition-all duration-300"
+      className="rounded-full bg-background/95 border border-border shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden"
       onClick={toggleTheme}
     >
-      {isDark ? (
-        <Sun className="h-[1.5rem] w-[1.4rem] scale-100 transition-all text-orange-500 fill-orange-500" />
-      ) : (
-        <Moon className="h-[1.5rem] w-[1.5rem] scale-100 transition-all text-blue-500 fill-blue-500" />
-      )}
+      <div className={`absolute inset-0 flex items-center justify-center transition-transform duration-500 ${isDark ? 'rotate-0 opacity-100' : '-rotate-90 opacity-0'}`}>
+        <Sun className="h-[1.5rem] w-[1.5rem] text-orange-500 fill-orange-500" />
+      </div>
+      <div className={`absolute inset-0 flex items-center justify-center transition-transform duration-500 ${!isDark ? 'rotate-0 opacity-100' : 'rotate-90 opacity-0'}`}>
+        <Moon className="h-[1.5rem] w-[1.5rem] text-blue-500 fill-blue-500" />
+      </div>
       <span className="sr-only">Toggle theme</span>
     </Button>
   );
