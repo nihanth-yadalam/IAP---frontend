@@ -5,6 +5,7 @@ import {
     Home,
     Calendar,
     ListTodo,
+    Columns3,
     BookOpen,
     Settings,
     Menu,
@@ -27,6 +28,7 @@ const navItems = [
     { icon: Home, label: "Dashboard", href: "/dashboard" },
     { icon: Calendar, label: "Calendar", href: "/calendar" },
     { icon: ListTodo, label: "Tasks", href: "/tasks" },
+    { icon: Columns3, label: "Kanban", href: "/kanban" },
     { icon: BookOpen, label: "Courses", href: "/courses" },
     { icon: Settings, label: "Settings", href: "/settings" },
 ];
