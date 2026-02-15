@@ -15,8 +15,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    /* Richer Primary: Vivid Violet/Indigo */
-    --primary: 250 85% 60%;
+    /* Richer Primary: Vivid Violet/Indigo - Darkened for visibility */
+    --primary: 250 90% 55%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -61,29 +61,29 @@
     --background: 222 47% 11%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 11%;
+    --card: 222 41% 14%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 11%;
+    --popover: 222 41% 14%;
     --popover-foreground: 210 40% 98%;
 
     --primary: 250 85% 65%;
     --primary-foreground: 222 47% 11%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 217.2 32.6% 20%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 217.2 32.6% 20%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --border: 217.2 30% 25%;
+    --input: 217.2 30% 25%;
     --ring: 250 85% 65%;
 
     --vibrant-purple: 260 90% 70%;
@@ -99,7 +99,7 @@
     --sidebar-primary-foreground: 222 47% 11%;
     --sidebar-accent: 217.2 32.6% 17.5%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-border: 217.2 30% 25%;
     --sidebar-ring: 250 85% 65%;
   }
 }
@@ -110,6 +110,12 @@
   }
 
   /* Ensure input text and autofill are always visible */
+  input,
+  textarea,
+  select {
+    color: hsl(var(--foreground)) !important;
+  }
+
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
@@ -118,6 +124,12 @@
     -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
     box-shadow: 0 0 0 1000px hsl(var(--background)) inset !important;
     caret-color: hsl(var(--foreground));
+  }
+
+  .dark input,
+  .dark textarea,
+  .dark select {
+    color: hsl(var(--foreground)) !important;
   }
 
   .dark input:-webkit-autofill,
@@ -149,65 +161,167 @@
   }
 }
 
-@layer utilities {
+/* ─── Force solid, readable backgrounds on all popups ─── */
 
-  /* Force profile/account dropdown to be solid white (no transparency) */
-  .dropdown-solid-bg {
-    background-color: #ffffff !important;
-    opacity: 1 !important;
-  }
-
-  .dark .dropdown-solid-bg {
-    background-color: #18181b !important;
-    opacity: 1 !important;
-  }
-
-  .glass {
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-  }
-
-  .dark .glass {
-    background: rgba(17, 24, 39, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-
-  .glass-card {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-  }
-
-  .dark .glass-card {
-    background: rgba(30, 41, 59, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  }
-
-  .gradient-text {
-    background: linear-gradient(135deg, hsl(var(--vibrant-purple)), hsl(var(--vibrant-cyan)));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .gradient-border-bottom {
-    position: relative;
-  }
-
-  .gradient-border-bottom::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: linear-gradient(90deg, hsl(var(--vibrant-purple)), hsl(var(--vibrant-cyan)));
-  }
+/* Light mode: white bg, dark text, visible borders */
+[data-radix-popper-content-wrapper]>*,
+[role="dialog"],
+.dropdown-solid-bg {
+  background-color: #ffffff !important;
+  color: #1a1a2e !important;
 }
+
+[data-radix-popper-content-wrapper]>* *,
+[role="dialog"] * {
+  color: inherit;
+}
+
+/* Inputs inside popups: slightly gray bg */
+[role="dialog"] input,
+[role="dialog"] textarea,
+[role="dialog"] select,
+[role="dialog"] [role="combobox"] {
+  background-color: #f4f4f5 !important;
+  color: #1a1a2e !important;
+  border-color: #d4d4d8 !important;
+}
+
+[role="dialog"] input::placeholder,
+[role="dialog"] textarea::placeholder {
+  color: #71717a !important;
+}
+
+/* Labels */
+[role="dialog"] label {
+  color: #3f3f46 !important;
+}
+
+/* Dark mode overrides */
+.dark [data-radix-popper-content-wrapper]>*,
+.dark [role="dialog"],
+.dark .dropdown-solid-bg {
+  background-color: #1e293b !important;
+  color: #f1f5f9 !important;
+}
+
+.dark [data-radix-popper-content-wrapper]>* *,
+.dark [role="dialog"] * {
+  color: inherit;
+}
+
+.dark [role="dialog"] input,
+.dark [role="dialog"] textarea,
+.dark [role="dialog"] select,
+.dark [role="dialog"] [role="combobox"] {
+  background-color: #0f172a !important;
+  color: #f1f5f9 !important;
+  border-color: #475569 !important;
+}
+
+.dark [role="dialog"] input::placeholder,
+.dark [role="dialog"] textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+.dark [role="dialog"] label {
+  color: #cbd5e1 !important;
+}
+
+/* Separators */
+.dark [role="dialog"] [role="separator"] {
+  background-color: #334155 !important;
+}
+
+/* Focus states in dark popups */
+.dark [data-radix-popper-content-wrapper] [data-highlighted],
+.dark [data-radix-popper-content-wrapper] [data-state="checked"] {
+  background-color: #334155 !important;
+  color: #f1f5f9 !important;
+}
+
+/* Dropdown items hover */
+[data-radix-popper-content-wrapper] [role="option"]:hover,
+[data-radix-popper-content-wrapper] [role="menuitem"]:hover {
+  background-color: #f4f4f5 !important;
+}
+
+.dark [data-radix-popper-content-wrapper] [role="option"]:hover,
+.dark [data-radix-popper-content-wrapper] [role="menuitem"]:hover {
+  background-color: #334155 !important;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.dark .glass {
+  background: rgba(17, 24, 39, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+.dark .glass-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, hsl(var(--vibrant-purple)), hsl(var(--vibrant-cyan)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-border-bottom {
+  position: relative;
+}
+
+.gradient-border-bottom::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, hsl(var(--vibrant-purple)), hsl(var(--vibrant-cyan)));
+}
+
+/* Global Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* Firefox support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
+}
+
+
 
 /* RBC overrides adapted for Vibrant theme */
 .rbc-calendar {

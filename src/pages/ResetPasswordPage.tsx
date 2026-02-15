@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { AuthShell } from "@/components/AuthShell";
 import { api } from "@/lib/api";
+import { PasswordStrengthIndicator, validatePassword } from "@/components/ui/password-strength";
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -22,8 +23,8 @@ export default function ResetPasswordPage() {
       setErr("Passwords do not match");
       return;
     }
-    if (password.length < 6) {
-      setErr("Password must be at least 6 characters");
+    if (!validatePassword(password)) {
+      setErr("Password does not meet all requirements");
       return;
     }
     setLoading(true);
@@ -52,7 +53,7 @@ export default function ResetPasswordPage() {
             Your password has been reset. You can now sign in with your new password.
           </p>
           <Link to="/login">
-            <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button variant="gradient" className="w-full h-11 rounded-xl font-semibold shadow-md">
               Sign in
             </Button>
           </Link>
@@ -80,9 +81,9 @@ export default function ResetPasswordPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            minLength={6}
-            className="rounded-xl bg-card text-foreground border-border"
+            className="rounded-xl h-11 bg-background border-border focus:border-primary transition-all"
           />
+          <PasswordStrengthIndicator password={password} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="confirm" className="text-foreground">Confirm password</Label>
@@ -93,15 +94,18 @@ export default function ResetPasswordPage() {
             value={confirm}
             onChange={(e) => setConfirm(e.target.value)}
             required
-            minLength={6}
-            className="rounded-xl bg-card text-foreground border-border"
+            className="rounded-xl h-11 bg-background border-border focus:border-primary transition-all"
           />
+          {password && confirm && password !== confirm && (
+            <p className="text-xs text-destructive font-medium">Passwords do not match</p>
+          )}
         </div>
         {err && <div className="text-sm text-destructive bg-destructive/10 px-3 py-2 rounded-lg">{err}</div>}
         <Button
           type="submit"
-          disabled={loading || !password || !confirm}
-          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl active:scale-[0.98]"
+          disabled={loading || !validatePassword(password) || password !== confirm}
+          variant="gradient"
+          className="w-full h-11 rounded-xl font-semibold shadow-md"
         >
           {loading ? "Resetting…" : "Reset password"}
         </Button>

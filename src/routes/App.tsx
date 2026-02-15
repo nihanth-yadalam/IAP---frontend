@@ -9,6 +9,7 @@ import HomePage from "@/pages/HomePage";
 import CalendarPage from "@/pages/CalendarPage";
 import TasksPage from "@/pages/TasksPage";
 import CoursesPage from "@/pages/CoursesPage";
+import KanbanPage from "@/pages/KanbanPage";
 import SettingsPage from "@/pages/SettingsPage";
 import Protected from "./Protected";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="tasks" element={<TasksPage />} />
           <Route path="courses" element={<CoursesPage />} />
+          <Route path="kanban" element={<KanbanPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
 

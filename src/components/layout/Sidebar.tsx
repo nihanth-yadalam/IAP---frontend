@@ -5,6 +5,7 @@ import {
     Home,
     Calendar,
     ListTodo,
+    Columns3,
     BookOpen,
     Settings,
     Menu,
@@ -27,6 +28,7 @@ const navItems = [
     { icon: Home, label: "Dashboard", href: "/dashboard" },
     { icon: Calendar, label: "Calendar", href: "/calendar" },
     { icon: ListTodo, label: "Tasks", href: "/tasks" },
+    { icon: Columns3, label: "Kanban", href: "/kanban" },
     { icon: BookOpen, label: "Courses", href: "/courses" },
     { icon: Settings, label: "Settings", href: "/settings" },
 ];
@@ -38,7 +40,7 @@ function SidebarBrand({ collapsed }: { collapsed: boolean }) {
                 <GraduationCap className="h-5 w-5" />
             </div>
             {!collapsed && (
-                <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-primary to-vibrant-purple bg-clip-text text-transparent animate-fade-in">
+                <span className="text-lg font-bold tracking-tight bg-gradient-to-r from-primary to-vibrant-purple bg-clip-text animate-fade-in">
                     Schedora
                 </span>
             )}
