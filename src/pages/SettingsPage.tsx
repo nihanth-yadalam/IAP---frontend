@@ -88,7 +88,30 @@ export default function SettingsPage() {
 
     useEffect(() => {
         loadProfile();
+        loadBusySlots();
     }, []);
+
+    const DAY_NAME_TO_INDEX: Record<string, number> = {
+        Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3,
+        Friday: 4, Saturday: 5, Sunday: 6,
+    };
+
+    async function loadBusySlots() {
+        try {
+            const res = await api.get("/schedule/fixed");
+            const grid: Record<string, boolean> = {};
+            for (const slot of res.data ?? []) {
+                const dayIdx = DAY_NAME_TO_INDEX[slot.day_of_week];
+                if (dayIdx === undefined || !slot.start_time || !slot.end_time) continue;
+                const startHour = parseInt(slot.start_time.split(":")[0], 10);
+                const endHour = parseInt(slot.end_time.split(":")[0], 10);
+                for (let h = startHour; h < endHour; h++) {
+                    grid[`${dayIdx}-${h}`] = true;
+                }
+            }
+            setBusyGrid(grid);
+        } catch (e) { console.error(e); }
+    }
 
     async function loadProfile() {
         try {
@@ -177,6 +200,12 @@ export default function SettingsPage() {
                                     <Label>Major</Label>
                                     <Input value={major} onChange={e => setMajor(e.target.value)} placeholder="Your major" className="rounded-xl" />
                                 </div>
+                            </div>
+                            <div className="flex justify-end">
+                                <Button onClick={handleSaveProfile} disabled={loading} className="rounded-xl">
+                                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                    Save Profile
+                                </Button>
                             </div>
                         </CardContent>
                     </Card>

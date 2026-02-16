@@ -94,13 +94,13 @@ const STATUS_TO_FRONTEND: Record<string, string> = {
 // ── Day-of-week mapping ──────────────────────────────────────────────────────
 
 const DAY_NAMES = [
-  "Sunday",
   "Monday",
   "Tuesday",
   "Wednesday",
   "Thursday",
   "Friday",
   "Saturday",
+  "Sunday",
 ];
 
 // ── Transform a backend task → frontend task ─────────────────────────────────

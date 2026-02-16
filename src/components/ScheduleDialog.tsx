@@ -108,7 +108,14 @@ export default function ScheduleDialog({
       if (taskToEdit) { await updateTask(taskToEdit.id, payload); }
       else { await addTask(payload); }
       onOpenChange(false);
-    } catch (e: any) { setErr(e?.message || "Failed to save task"); }
+    } catch (e: any) {
+      const detail = e?.response?.data?.detail;
+      if (detail) {
+        setErr(detail);
+      } else {
+        setErr(e?.message || "Failed to save task");
+      }
+    }
   }
 
   const categoryEmoji = { exam: "📝", assignment: "📋", extra: "🎭" };
