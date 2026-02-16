@@ -39,6 +39,9 @@ export default function SettingsPage() {
                 setName(res.data.name || "");
                 setUniversity(res.data.university || "");
                 setMajor(res.data.major || "");
+                if (res.data.chronotype) setChronotype(res.data.chronotype);
+                if (res.data.work_style) setWorkStyle(res.data.work_style);
+                if (res.data.preferred_session_mins) setSessionLength(res.data.preferred_session_mins);
             }
         } catch (e) { console.error(e); }
     }

@@ -93,11 +93,18 @@ export default function WizardPage() {
   }
 
   async function next() {
-    if (step === 1) saveProfile();
+    // Save profile after workstyle step (step 3), when all questionnaire data is collected
+    if (step === 3) saveProfile();
     if (step === 4) saveBusySlots();
 
     setDirection(1);
     setStep(s => Math.min(s + 1, steps.length - 1));
+  }
+
+  async function finishWizard() {
+    // Final save to ensure everything is persisted
+    await saveProfile();
+    nav("/dashboard");
   }
 
   function back() {
@@ -197,7 +204,7 @@ export default function WizardPage() {
                       {step === 0 ? "Get Started" : "Next Step"} <ArrowRight className="h-5 w-5" />
                     </Button>
                   ) : (
-                    <Button onClick={() => nav("/dashboard")} size="lg" className="gap-2 bg-green-500 hover:bg-green-600 text-white text-lg px-8 rounded-full shadow-lg shadow-green-500/20">
+                    <Button onClick={finishWizard} size="lg" className="gap-2 bg-green-500 hover:bg-green-600 text-white text-lg px-8 rounded-full shadow-lg shadow-green-500/20">
                       Go to Dashboard <CheckCircle2 className="h-5 w-5" />
                     </Button>
                   )}

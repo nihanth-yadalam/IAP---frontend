@@ -220,17 +220,22 @@ async function route(
   if (method === "GET" && path === "/auth/me") {
     const res = await axiosInstance.get("/users/me");
     const u = res.data;
+    const profile = u.profile ?? {};
+    const onboarding = profile.onboarding_data ?? {};
     return {
       data: {
         id: String(u.id),
         email: u.email,
         username: u.username,
-        name: u.profile?.full_name || u.username,
-        chronotype:
-          u.profile?.onboarding_data?.chronotype || "balanced",
+        name: profile.full_name || u.username,
+        university: profile.university || "",
+        major: profile.major || "",
+        chronotype: onboarding.chronotype || "balanced",
+        work_style: onboarding.work_style || "mixed",
+        preferred_session_mins: onboarding.preferred_session_mins || 60,
         avatar_url: null,
         google_linked: u.google_linked ?? false,
-        profile: u.profile ?? null,
+        profile: profile,
       },
     };
   }
