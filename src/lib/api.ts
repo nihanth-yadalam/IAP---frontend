@@ -1,442 +1,126 @@
-// Frontend-only mock API (no backend required)
-// Stores everything in localStorage to let the UI work end-to-end.
-// When you connect a real backend later, you can replace this file with axios calls.
+import axios, { AxiosError } from "axios";
 
-type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
+// -----------------------------------------------------------------------------
+// Types (Matched to Backend Models)
+// -----------------------------------------------------------------------------
+
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
 type ApiResponse<T = any> = { data: T };
 
-type User = { id: string; email: string; username: string; password: string; name?: string | null };
-type Profile = {
-  name?: string;
-  university?: string;
-  major?: string;
-  chronotype?: "morning" | "balanced" | "night";
-  work_style?: "deep" | "mixed" | "sprints";
-  preferred_session_mins?: number;
-  calendar_write_enabled?: boolean;
+export type User = {
+  id: string; // Backend uses int, but frontend treats as string mostly. Keep uniform.
+  email: string;
+  username: string;
+  name?: string | null; // Mapped from profile.full_name
+  avatar_url?: string;
+  chronotype?: "morning" | "balanced" | "night"; // Mapped from profile.onboarding_data
 };
 
-type BusySlot = { day_of_week: number; start_hour: number; end_hour: number; title?: string; slot_type: string };
-
-type Task = {
-  id: string;
-  category: "exam" | "assignment" | "extra";
-  title: string;
-  description?: string | null;
-  deadline: string; // ISO
-  status: "pending" | "completed" | "dropped";
-  priority: "low" | "medium" | "high";
-  planned_start?: string | null;
-  planned_end?: string | null;
+type LoginResponse = {
+  access_token: string;
+  token_type: string;
 };
 
-type Feedback = { id: string; task_id: string; actual_duration_mins: number; drain_intensity: number; note?: string; created_at: string };
+// -----------------------------------------------------------------------------
+// Axios Instance
+// -----------------------------------------------------------------------------
 
-const LS = {
-  users: "aap_users_v1",
-  token: "aap_token",
-  profile: "aap_profile_v1",
-  busy: "aap_busy_v1",
-  tasks: "aap_tasks_v1",
-  feedback: "aap_feedback_v1",
-} as const;
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
-function readJSON<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return fallback;
-    return JSON.parse(raw) as T;
-  } catch {
-    return fallback;
-  }
+const axiosInstance = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+// Auth Interceptor
+let authToken: string | null = localStorage.getItem("aap_token");
+
+if (authToken) {
+  axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${authToken}`;
 }
-
-function writeJSON<T>(key: string, value: T) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
-
-function uid() {
-  // Avoid crypto dependency for older browsers
-  return Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
-}
-
-let authToken: string | null = null;
 
 export function setAuthToken(token: string | null) {
   authToken = token;
-}
-
-function getUserIdFromToken(t: string | null): string | null {
-  if (!t) return null;
-  const parts = t.split(".");
-  // token format: aap.<userId>.<random>
-  if (parts.length >= 3 && parts[0] === "aap") return parts[1];
-  return null;
-}
-
-function requireUserId(): string {
-  const userId = getUserIdFromToken(authToken) ?? getUserIdFromToken(localStorage.getItem(LS.token));
-  if (!userId) throw { response: { data: { detail: "Not authenticated" } } };
-  return userId;
-}
-
-function getAllUsers(): User[] {
-  return readJSON<User[]>(LS.users, []);
-}
-
-function saveUsers(users: User[]) {
-  writeJSON(LS.users, users);
-}
-
-function getProfileMap(): Record<string, Profile> {
-  return readJSON<Record<string, Profile>>(LS.profile, {});
-}
-function saveProfileMap(m: Record<string, Profile>) {
-  writeJSON(LS.profile, m);
-}
-
-function getBusyMap(): Record<string, BusySlot[]> {
-  return readJSON<Record<string, BusySlot[]>>(LS.busy, {});
-}
-function saveBusyMap(m: Record<string, BusySlot[]>) {
-  writeJSON(LS.busy, m);
-}
-
-function getTaskMap(): Record<string, Task[]> {
-  return readJSON<Record<string, Task[]>>(LS.tasks, {});
-}
-function saveTaskMap(m: Record<string, Task[]>) {
-  writeJSON(LS.tasks, m);
-}
-
-function getFeedbackMap(): Record<string, Feedback[]> {
-  return readJSON<Record<string, Feedback[]>>(LS.feedback, {});
-}
-function saveFeedbackMap(m: Record<string, Feedback[]>) {
-  writeJSON(LS.feedback, m);
-}
-
-function ok<T>(data: T): Promise<ApiResponse<T>> {
-  return Promise.resolve({ data });
-}
-
-function nowISO() {
-  return new Date().toISOString();
-}
-
-function scheduleTasksHeuristic(userId: string) {
-  const taskMap = getTaskMap();
-  const tasks = (taskMap[userId] ?? []).slice();
-  const busyMap = getBusyMap();
-  const busy = busyMap[userId] ?? [];
-
-  const profile = getProfileMap()[userId] ?? {};
-  const session = profile.preferred_session_mins ?? 60;
-
-  // Simple heuristic:
-  // - Sort pending tasks by deadline
-  // - Place sessions in next available hours (08:00-22:00), skipping fixed busy slots (hour granularity)
-  const pending = tasks
-    .filter(t => t.status === "pending")
-    .sort((a, b) => new Date(a.deadline).getTime() - new Date(b.deadline).getTime());
-
-  // Build busy lookup: day(0-6)-hour => busy
-  const busySet = new Set<string>();
-  for (const s of busy) {
-    for (let h = s.start_hour; h < s.end_hour; h++) busySet.add(`${s.day_of_week}-${h}`);
+  if (token) {
+    localStorage.setItem("aap_token", token);
+    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+  } else {
+    localStorage.removeItem("aap_token");
+    delete axiosInstance.defaults.headers.common["Authorization"];
   }
-
-  const start = new Date();
-  start.setMinutes(0, 0, 0);
-
-  function isBusy(dt: Date) {
-    const d = dt.getDay(); // 0 Sunday
-    const dow = (d + 6) % 7; // convert to 0 Monday ... 6 Sunday
-    const h = dt.getHours();
-    return busySet.has(`${dow}-${h}`);
-  }
-
-  // pick start hour based on chronotype
-  const chrono = profile.chronotype ?? "balanced";
-  const preferredStart = chrono === "morning" ? 8 : chrono === "night" ? 12 : 10;
-
-  let cursor = new Date(start);
-  if (cursor.getHours() < preferredStart) cursor.setHours(preferredStart);
-
-  for (const t of pending) {
-    // allocate one block for now (MVP). planned_end = start + session minutes
-    // Find next available hour slot that isn't busy and within 08-22
-    while (true) {
-      const h = cursor.getHours();
-      if (h < 8) cursor.setHours(8);
-      if (h >= 22) {
-        cursor.setDate(cursor.getDate() + 1);
-        cursor.setHours(preferredStart, 0, 0, 0);
-        continue;
-      }
-      if (isBusy(cursor)) {
-        cursor.setHours(cursor.getHours() + 1);
-        continue;
-      }
-      break;
-    }
-    const plannedStart = new Date(cursor);
-    const plannedEnd = new Date(cursor);
-    plannedEnd.setMinutes(plannedEnd.getMinutes() + session);
-
-    // store
-    t.planned_start = plannedStart.toISOString();
-    t.planned_end = plannedEnd.toISOString();
-
-    // move cursor forward
-    cursor = new Date(plannedEnd);
-    cursor.setMinutes(0, 0, 0);
-  }
-
-  taskMap[userId] = tasks;
-  saveTaskMap(taskMap);
 }
 
-async function handle(method: HttpMethod, path: string, body?: any): Promise<ApiResponse<any>> {
-  // Auth endpoints
-  if (method === "POST" && path === "/auth/signup") {
-    const { username, email, password, name } = body ?? {};
-    if (!email || !password || !username) throw { response: { data: { detail: "Username, email and password required" } } };
-    const users = getAllUsers();
-    if (users.some(u => u.email.toLowerCase() === String(email).toLowerCase())) {
-      throw { response: { data: { detail: "Email already exists" } } };
-    }
-    if (users.some(u => u.username?.toLowerCase() === String(username).toLowerCase())) {
-      throw { response: { data: { detail: "Username already exists" } } };
-    }
-    const u: User = { id: uid(), email, password, username, name: name ?? null };
-    users.push(u);
-    saveUsers(users);
-    return ok({ id: u.id });
-  }
+// -----------------------------------------------------------------------------
+// Helpers: Enum & Data Transformation
+// -----------------------------------------------------------------------------
 
-  if (method === "POST" && path === "/auth/login") {
-    const { login, password } = body ?? {}; // login can be email or username
-    const users = getAllUsers();
-    const u = users.find(x =>
-      x.email.toLowerCase() === String(login).toLowerCase() ||
-      x.username?.toLowerCase() === String(login).toLowerCase()
-    );
-    if (!u || u.password !== password) {
-      throw { response: { data: { detail: "Invalid credentials" } } };
-    }
-    const token = `aap.${u.id}.${uid()}`;
-    localStorage.setItem(LS.token, token);
-    setAuthToken(token);
-    return ok({ access_token: token, token_type: "bearer" });
-  }
+function mapTaskFromBackend(t: any): any {
+  return {
+    id: String(t.id),
+    category: t.category === "Study" || t.category === "Project" ? "extra" : t.category?.toLowerCase() || "assignment",
+    title: t.title,
+    description: t.description,
+    deadline: t.deadline,
+    status: t.status === "In_Progress" ? "pending" : t.status?.toLowerCase() || "pending",
+    priority: t.priority?.toLowerCase() || "medium",
+    planned_start: t.scheduled_start_time,
+    planned_end: t.scheduled_end_time,
+    course_id: t.course_id,
+  };
+}
 
-  if (method === "GET" && path === "/auth/me") {
-    const userId = requireUserId();
-    const users = getAllUsers();
-    const u = users.find(x => x.id === userId);
-    if (!u) throw { response: { data: { detail: "User not found" } } };
-    const profile = getProfileMap()[userId] ?? {};
-    return ok({
-      id: u.id,
-      email: u.email,
-      username: u.username,
-      name: profile.name ?? u.name ?? null,
-      chronotype: profile.chronotype ?? "balanced",
+function mapTaskToBackend(t: any): any {
+  let category = "Assignment";
+  if (t.category === "exam") category = "Exam";
+  if (t.category === "extra") category = "Study"; // Defaulting 'extra' to 'Study'
+
+  let priority = "Medium";
+  if (t.priority === "high") priority = "High";
+  if (t.priority === "low") priority = "Low";
+
+  let status = "Pending";
+  if (t.status === "completed") status = "Completed";
+  // 'dropped' -> keep valid status or ignore. Backend doesn't support 'dropped' explicitly.
+
+  return {
+    title: t.title,
+    description: t.description,
+    priority,
+    category,
+    status,
+    deadline: t.deadline,
+    scheduled_start_time: t.planned_start,
+    scheduled_end_time: t.planned_end,
+    estimated_duration_mins: 60, // Default or calculate
+    course_id: t.course_id,
+  };
+}
+
+// -----------------------------------------------------------------------------
+// API Interface
+// -----------------------------------------------------------------------------
+
+async function handleRequest<T>(
+  method: HttpMethod,
+  path: string,
+  data?: any,
+  params?: any
+): Promise<ApiResponse<T>> {
+  try {
+    const response = await axiosInstance({
+      method,
+      url: path,
+      data,
+      params,
     });
+    return { data: response.data };
+  } catch (error: any) {
+    console.error(`API Error ${method} ${path}:`, error.response?.data || error.message);
+    throw error;
   }
-
-  if (method === "POST" && path === "/auth/forgot-password") {
-    // UI-only stub; in real app, send email
-    return ok({ ok: true });
-  }
-  if (method === "POST" && path === "/auth/forgot") {
-    return ok({ ok: true });
-  }
-  if (method === "POST" && path === "/auth/reset-password") {
-    const { token, new_password } = body ?? {};
-    if (!token || !new_password) throw { response: { data: { detail: "Token and new password required" } } };
-    // Mock: accept any token and update password for first user (demo only)
-    const users = getAllUsers();
-    if (users.length === 0) throw { response: { data: { detail: "Invalid or expired token" } } };
-    users[0].password = new_password;
-    saveUsers(users);
-    return ok({ ok: true });
-  }
-
-  // Profile / onboarding
-  if (method === "POST" && path === "/profile/baseline") {
-    const userId = requireUserId();
-    const m = getProfileMap();
-    m[userId] = { ...(m[userId] ?? {}), ...(body ?? {}) };
-    saveProfileMap(m);
-    return ok({ ok: true });
-  }
-
-  // Busy slots
-  if (method === "POST" && path === "/busy-slots/bulk") {
-    const userId = requireUserId();
-    const { slots } = body ?? { slots: [] };
-    const m = getBusyMap();
-    m[userId] = Array.isArray(slots) ? slots : [];
-    saveBusyMap(m);
-    return ok({ ok: true });
-  }
-
-  // Calendar prefs + connect
-  if (method === "POST" && path === "/calendar/prefs") {
-    const userId = requireUserId();
-    const m = getProfileMap();
-    m[userId] = { ...(m[userId] ?? {}), calendar_write_enabled: !!body?.write_enabled };
-    saveProfileMap(m);
-    return ok({ ok: true });
-  }
-  if (method === "GET" && path === "/calendar/google/connect-url") {
-    // UI stub — just return a fake URL
-    return ok({ url: "#" });
-  }
-
-  // Tasks
-  if (method === "GET" && path === "/tasks") {
-    const userId = requireUserId();
-    const tasks = getTaskMap()[userId] ?? [];
-    return ok(tasks);
-  }
-
-  if (method === "POST" && path === "/tasks") {
-    const userId = requireUserId();
-    const t: Task = {
-      id: uid(),
-      category: body?.category ?? "assignment",
-      title: body?.title ?? "Untitled",
-      description: body?.description ?? null,
-      deadline: body?.deadline ?? nowISO(),
-      status: "pending",
-      priority: body?.priority ?? "medium",
-      planned_start: null,
-      planned_end: null,
-    };
-    const m = getTaskMap();
-    m[userId] = [...(m[userId] ?? []), t];
-    saveTaskMap(m);
-    return ok(t);
-  }
-
-  // Update task endpoint: PUT /tasks/{id}
-  const taskMatch = path.match(/^\/tasks\/([^/]+)$/);
-  if (method === "PUT" && taskMatch) {
-    const userId = requireUserId();
-    const id = taskMatch[1];
-    const taskMap = getTaskMap();
-    const tasks = taskMap[userId] ?? [];
-    const idx = tasks.findIndex(t => t.id === id);
-    if (idx === -1) throw { response: { data: { detail: "Task not found" } } };
-
-    // Merge updates
-    tasks[idx] = { ...tasks[idx], ...body };
-    taskMap[userId] = tasks;
-    saveTaskMap(taskMap);
-    return ok(tasks[idx]);
-  }
-
-  // Delete task endpoint: DELETE /tasks/{id}
-  if (method === "DELETE" && taskMatch) {
-    const userId = requireUserId();
-    const id = taskMatch[1];
-    const taskMap = getTaskMap();
-    const tasks = taskMap[userId] ?? [];
-    const idx = tasks.findIndex(t => t.id === id);
-    if (idx === -1) throw { response: { data: { detail: "Task not found" } } };
-
-    tasks.splice(idx, 1);
-    taskMap[userId] = tasks;
-    saveTaskMap(taskMap);
-    return ok({ ok: true });
-  }
-
-  // complete task endpoint: /tasks/{id}/complete
-  const completeMatch = path.match(/^\/tasks\/([^/]+)\/complete$/);
-  if (method === "POST" && completeMatch) {
-    const userId = requireUserId();
-    const id = completeMatch[1];
-    const taskMap = getTaskMap();
-    const tasks = taskMap[userId] ?? [];
-    const idx = tasks.findIndex(t => t.id === id);
-    if (idx === -1) throw { response: { data: { detail: "Task not found" } } };
-    tasks[idx] = { ...tasks[idx], status: "completed" };
-    taskMap[userId] = tasks;
-    saveTaskMap(taskMap);
-
-    const fbMap = getFeedbackMap();
-    const fb: Feedback = {
-      id: uid(),
-      task_id: id,
-      actual_duration_mins: Number(body?.actual_duration_mins ?? 60),
-      drain_intensity: Number(body?.drain_intensity ?? 3),
-      note: body?.note,
-      created_at: nowISO(),
-    };
-    fbMap[userId] = [...(fbMap[userId] ?? []), fb];
-    saveFeedbackMap(fbMap);
-
-    return ok({ ok: true });
-  }
-
-  // schedule
-  if (method === "POST" && path === "/schedule/run") {
-    const userId = requireUserId();
-    scheduleTasksHeuristic(userId);
-    return ok({ ok: true });
-  }
-
-  // Courses endpoints
-  if (method === "GET" && path === "/courses") {
-    const userId = requireUserId();
-    const courses = readJSON<any[]>(`aap_courses_${userId}`, []);
-    return ok(courses);
-  }
-
-  if (method === "POST" && path === "/courses") {
-    const userId = requireUserId();
-    const courses = readJSON<any[]>(`aap_courses_${userId}`, []);
-    const c = {
-      id: uid(),
-      name: body?.name || "New Course",
-      code: body?.code || "",
-      color: body?.color || "#3b82f6",
-      term: body?.term
-    };
-    courses.push(c);
-    writeJSON(`aap_courses_${userId}`, courses);
-    return ok(c);
-  }
-
-  const courseMatch = path.match(/^\/courses\/([^/]+)$/);
-  if (method === "PUT" && courseMatch) {
-    const userId = requireUserId();
-    const id = courseMatch[1];
-    const courses = readJSON<any[]>(`aap_courses_${userId}`, []);
-    const idx = courses.findIndex(c => c.id === id);
-    if (idx === -1) throw { response: { data: { detail: "Course not found" } } };
-    courses[idx] = { ...courses[idx], ...body };
-    writeJSON(`aap_courses_${userId}`, courses);
-    return ok(courses[idx]);
-  }
-
-  if (method === "DELETE" && courseMatch) {
-    const userId = requireUserId();
-    const id = courseMatch[1];
-    const courses = readJSON<any[]>(`aap_courses_${userId}`, []);
-    const idx = courses.findIndex(c => c.id === id);
-    if (idx !== -1) {
-      courses.splice(idx, 1);
-      writeJSON(`aap_courses_${userId}`, courses);
-    }
-    return ok({ ok: true });
-  }
-
-  throw { response: { data: { detail: `Mock API: Unhandled route ${method} ${path}` } } };
 }
 
 export const api = {
@@ -444,4 +128,155 @@ export const api = {
   post: (path: string, body?: any) => handle("POST", path, body),
   put: (path: string, body?: any) => handle("PUT", path, body),
   delete: (path: string) => handle("DELETE", path),
+  patch: (path: string, body?: any) => handle("PATCH", path, body),
 };
+
+// Internal router to handle legacy calls from useAuthStore/useTaskStore
+// and route them to correct backend endpoints.
+async function handle(method: HttpMethod, path: string, body?: any): Promise<ApiResponse<any>> {
+  
+  // --- AUTH ---
+  
+  if (method === "POST" && path === "/auth/login") {
+    // Backend: POST /auth/login/access-token (Form Data)
+    const formData = new URLSearchParams();
+    // frontend sends { login, password }
+    formData.append("username", body.login);
+    formData.append("password", body.password);
+    
+    const res = await axiosInstance.post<LoginResponse>("/auth/login/access-token", formData, {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+    return { data: res.data };
+  }
+
+  if (method === "POST" && path === "/auth/signup") {
+    // Backend: POST /users/
+    const res = await axiosInstance.post("/users/", {
+      email: body.email,
+      username: body.username,
+      password: body.password,
+    });
+    return { data: res.data };
+  }
+
+  if (method === "GET" && path === "/auth/me") {
+    // Backend: GET /users/me
+    const res = await axiosInstance.get("/users/me");
+    const u = res.data;
+    // Transform: flatten profile name
+    const transformed = {
+        id: String(u.id),
+        email: u.email,
+        username: u.username,
+        name: u.profile?.full_name || u.username,
+        chronotype: u.profile?.onboarding_data?.chronotype || "balanced",
+        avatar_url: null
+    };
+    return { data: transformed };
+  }
+
+  if (method === "POST" && path === "/auth/forgot-password") {
+      // Backend: POST /users/password-recovery/{email}
+      const email = body.email;
+      await axiosInstance.post(`/users/password-recovery/${email}`);
+      return { data: { ok: true } };
+  }
+
+  if (method === "POST" && path === "/auth/reset-password") {
+      // Backend: POST /users/reset-password/
+      await axiosInstance.post("/users/reset-password/", {
+          token: body.token,
+          new_password: body.new_password
+      });
+      return { data: { ok: true } };
+  }
+  
+  // --- PROFILE ---
+
+  if (method === "POST" && path === "/profile/baseline") {
+    // Backend: POST /onboarding/questionnaire
+    // Body is OnboardingAnswers, which matches frontend payload mostly.
+    // Frontend sends: { name, university, major, chronotype, work_style, preferred_session_mins }
+    const res = await axiosInstance.post("/onboarding/questionnaire", body);
+    return { data: res.data };
+  }
+
+  // --- BUSY SLOTS ---
+  
+  if (method === "POST" && path === "/busy-slots/bulk") {
+    // Backend: POST /schedule/fixed (Bulk)
+    // Frontend: { slots: [...] }
+    const slots = body.slots.map((s: any) => ({
+        day_of_week: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][s.day_of_week] || "Monday",
+        start_time: `${String(s.start_hour).padStart(2,'0')}:00:00`,
+        end_time: `${String(s.end_hour).padStart(2,'0')}:00:00`,
+        label: s.title || "Busy"
+    }));
+    const res = await axiosInstance.post("/schedule/fixed", slots);
+    return { data: res.data };
+  }
+
+  // --- TASKS ---
+
+  if (method === "GET" && path === "/tasks") {
+    // Backend: GET /tasks/
+    const res = await axiosInstance.get("/tasks/");
+    const tasks = res.data.map(mapTaskFromBackend);
+    return { data: tasks };
+  }
+
+  if (method === "POST" && path === "/tasks") {
+    // Backend: POST /tasks/
+    const payload = mapTaskToBackend(body);
+    const res = await axiosInstance.post("/tasks/", payload);
+    const t = mapTaskFromBackend(res.data);
+    return { data: t };
+  }
+  
+  // PUT /tasks/{id} -> PATCH /tasks/{id}
+  const taskMatch = path.match(/^\/tasks\/([^/]+)$/);
+  if ((method === "PUT" || method === "PATCH") && taskMatch) {
+      const id = taskMatch[1];
+      const payload = mapTaskToBackend(body);
+      const res = await axiosInstance.patch(`/tasks/${id}`, payload);
+      return { data: mapTaskFromBackend(res.data) };
+  }
+  
+  if (method === "DELETE" && taskMatch) {
+      const id = taskMatch[1];
+      await axiosInstance.delete(`/tasks/${id}`);
+      return { data: { ok: true } };
+  }
+
+  // POST /tasks/{id}/complete
+  const completeMatch = path.match(/^\/tasks\/([^/]+)\/complete$/);
+  if (method === "POST" && completeMatch) {
+      const id = completeMatch[1];
+      await axiosInstance.patch(`/tasks/${id}`, { status: "Completed" });
+      return { data: { ok: true } };
+  }
+
+  // --- COURSES ---
+  
+  if (method === "GET" && path === "/courses") {
+      const res = await axiosInstance.get("/courses/");
+      return { data: res.data };
+  }
+  
+  if (method === "POST" && path === "/courses") {
+      const res = await axiosInstance.post("/courses/", body);
+      return { data: res.data };
+  }
+
+  // --- SCHEDULE ---
+  
+  if (method === "POST" && path === "/schedule/run") {
+      // Backend handles this in background. No-op.
+      console.log("Triggering schedule run (handled by backend background service)");
+      return { data: { ok: true } };
+  }
+
+  // Fallback for direct calls
+  return handleRequest(method, path, body);
+}
