@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
-import { useCourseStore } from "@/stores/useCourseStore";
+import { useCourseStore, Course } from "@/stores/useCourseStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Plus, Edit, Trash2, BookOpen, Palette } from "lucide-react";
-
-type Course = ReturnType<typeof useCourseStore>["courses"][number];
 
 const presetColors = [
     "#8b5cf6", "#6366f1", "#3b82f6", "#06b6d4",

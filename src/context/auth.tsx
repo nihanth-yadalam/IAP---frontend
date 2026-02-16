@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { AuthAPI } from '@/lib/api'
+import { api, setAuthToken } from '@/lib/api'
 
 type AuthState = {
   token: string | null
@@ -23,18 +23,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   async function refreshMe() {
     if (!token) return
-    const me = await AuthAPI.me(token)
-    setUser(me)
+    setAuthToken(token)
+    try {
+      const res = await api.get('/auth/me')
+      const u = res.data
+      setUser({
+        id: u.id,
+        email: u.email,
+        name: u.name || u.username || '',
+        onboarding_complete: !!u.profile?.onboarding_data && Object.keys(u.profile.onboarding_data).length > 0,
+      })
+    } catch {
+      // token invalid
+      localStorage.removeItem(TOKEN_KEY)
+      setAuthToken(null)
+      setToken(null)
+      setUser(null)
+    }
   }
 
   useEffect(() => {
-    // best effort load user
-    refreshMe().catch(() => {
-      // token invalid
-      localStorage.removeItem(TOKEN_KEY)
-      setToken(null)
-      setUser(null)
-    })
+    refreshMe()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -44,17 +53,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthed,
       user,
       async login(email, password) {
-        const res = await AuthAPI.login(email, password)
-        localStorage.setItem(TOKEN_KEY, res.access_token)
-        setToken(res.access_token)
-        await refreshMe()
-        return { first_login: res.first_login }
+        const res = await api.post('/auth/login', { login: email, password })
+        const accessToken = res.data.access_token
+        localStorage.setItem(TOKEN_KEY, accessToken)
+        setAuthToken(accessToken)
+        setToken(accessToken)
+
+        // Fetch user profile to check onboarding
+        const me = await api.get('/auth/me')
+        const u = me.data
+        const onboardingComplete = !!u.profile?.onboarding_data && Object.keys(u.profile.onboarding_data).length > 0
+        setUser({
+          id: u.id,
+          email: u.email,
+          name: u.name || u.username || '',
+          onboarding_complete: onboardingComplete,
+        })
+
+        return { first_login: !onboardingComplete }
       },
       async signup(name, email, password) {
-        await AuthAPI.signup(name, email, password)
+        await api.post('/auth/signup', { username: name, email, password })
       },
       logout() {
         localStorage.removeItem(TOKEN_KEY)
+        setAuthToken(null)
         setToken(null)
         setUser(null)
       },
