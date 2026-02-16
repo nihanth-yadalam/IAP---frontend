@@ -36,6 +36,8 @@ axiosInstance.interceptors.response.use(
   (err) => {
     if (err.response?.status === 401) {
       setAuthToken(null);
+      // Also clear the Zustand persisted auth so Protected route redirects properly
+      localStorage.removeItem("schedora-auth-storage");
       // Only redirect if not already on login/signup pages
       const path = window.location.pathname;
       if (!["/login", "/signup", "/forgot-password", "/reset-password"].includes(path)) {
@@ -132,13 +134,25 @@ function taskToBackend(t: any): any {
     out.category = CATEGORY_TO_BACKEND[t.category] ?? "Assignment";
   if (t.status !== undefined)
     out.status = STATUS_TO_BACKEND[t.status] ?? "Pending";
-  if (t.planned_start !== undefined)
+
+  // Backend requires both scheduled_start_time and scheduled_end_time, or neither
+  if (t.planned_start) {
     out.scheduled_start_time = t.planned_start;
-  if (t.planned_end !== undefined)
+    // If planned_end isn't provided, use deadline as end time
+    out.scheduled_end_time = t.planned_end || t.deadline || null;
+  } else if (t.planned_end) {
     out.scheduled_end_time = t.planned_end;
+  }
+
   if (t.estimated_duration_mins !== undefined)
     out.estimated_duration_mins = t.estimated_duration_mins;
-  if (t.course_id !== undefined) out.course_id = t.course_id;
+
+  // course_id must be an integer or null — frontend sends string IDs
+  if (t.course_id !== undefined && t.course_id !== null && t.course_id !== "other") {
+    const parsed = parseInt(t.course_id, 10);
+    out.course_id = isNaN(parsed) ? null : parsed;
+  }
+
   return out;
 }
 
@@ -148,13 +162,14 @@ function courseFromBackend(c: any): any {
   return {
     id: String(c.id),
     name: c.name,
-    code: c.name
+    code: c.code ?? c.name
       ?.split(/\s+/)
       .map((w: string) => w[0])
       .join("")
       .toUpperCase()
       .slice(0, 4) ?? "",
     color: c.color_code ?? "#6366f1",
+    term: c.term ?? "",
     is_archived: c.is_archived ?? false,
   };
 }
@@ -164,7 +179,9 @@ function courseFromBackend(c: any): any {
 function courseToBackend(c: any): any {
   const out: any = {};
   if (c.name !== undefined) out.name = c.name;
+  if (c.code !== undefined) out.code = c.code;
   if (c.color !== undefined) out.color_code = c.color;
+  if (c.term !== undefined) out.term = c.term;
   if (c.is_archived !== undefined) out.is_archived = c.is_archived;
   return out;
 }
@@ -249,10 +266,19 @@ async function route(
     return { data: res.data };
   }
 
-  // [M9] Reset password
+  // [M9] Reset password (via email token)
   if (method === "POST" && path === "/auth/reset-password") {
     const res = await axiosInstance.post("/users/reset-password/", {
       token: body.token,
+      new_password: body.new_password,
+    });
+    return { data: res.data };
+  }
+
+  // [M7] Change password (authenticated, from Settings)
+  if (method === "POST" && path === "/auth/change-password") {
+    const res = await axiosInstance.post("/users/me/password", {
+      current_password: body.current_password,
       new_password: body.new_password,
     });
     return { data: res.data };

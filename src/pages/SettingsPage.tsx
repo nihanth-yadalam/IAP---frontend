@@ -8,8 +8,66 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BusySlotPainter } from "@/components/BusySlotPainter";
-import { Loader2, User, Clock, Link as LinkIcon, Calendar, Settings2, Shield } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Loader2, User, Clock, Link as LinkIcon, Calendar, Settings2, Shield, CheckCircle2 } from "lucide-react";
+
+function ChangePasswordSection() {
+    const [currentPw, setCurrentPw] = useState("");
+    const [newPw, setNewPw] = useState("");
+    const [confirmPw, setConfirmPw] = useState("");
+    const [pwLoading, setPwLoading] = useState(false);
+    const [pwMsg, setPwMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+    async function handleChangePassword() {
+        setPwMsg(null);
+        if (!currentPw || !newPw) { setPwMsg({ type: "error", text: "All fields are required." }); return; }
+        if (newPw !== confirmPw) { setPwMsg({ type: "error", text: "New passwords do not match." }); return; }
+        if (newPw.length < 6) { setPwMsg({ type: "error", text: "Password must be at least 6 characters." }); return; }
+        setPwLoading(true);
+        try {
+            await api.post("/auth/change-password", { current_password: currentPw, new_password: newPw });
+            setPwMsg({ type: "success", text: "Password changed successfully!" });
+            setCurrentPw(""); setNewPw(""); setConfirmPw("");
+        } catch (e: any) {
+            setPwMsg({ type: "error", text: e?.response?.data?.detail || "Failed to change password." });
+        }
+        setPwLoading(false);
+    }
+
+    return (
+        <div className="rounded-xl border border-border/60 bg-accent/20 p-4 space-y-4">
+            <div>
+                <p className="font-medium">Change password</p>
+                <p className="text-sm text-muted-foreground">Update your password securely.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-1">
+                    <Label className="text-xs">Current Password</Label>
+                    <Input type="password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} placeholder="••••••••" className="rounded-xl" />
+                </div>
+                <div className="space-y-1">
+                    <Label className="text-xs">New Password</Label>
+                    <Input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="••••••••" className="rounded-xl" />
+                </div>
+                <div className="space-y-1">
+                    <Label className="text-xs">Confirm New Password</Label>
+                    <Input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} placeholder="••••••••" className="rounded-xl" />
+                </div>
+            </div>
+            {pwMsg && (
+                <div className={`text-sm px-3 py-2 rounded-lg flex items-center gap-2 ${pwMsg.type === "success" ? "bg-green-500/10 text-green-600" : "bg-destructive/10 text-destructive"}`}>
+                    {pwMsg.type === "success" && <CheckCircle2 className="h-4 w-4" />}
+                    {pwMsg.text}
+                </div>
+            )}
+            <div className="flex justify-end">
+                <Button onClick={handleChangePassword} disabled={pwLoading || !currentPw || !newPw || !confirmPw} className="rounded-xl">
+                    {pwLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Change Password
+                </Button>
+            </div>
+        </div>
+    );
+}
 
 export default function SettingsPage() {
     const { user } = useAuthStore();
@@ -175,15 +233,7 @@ export default function SettingsPage() {
                             <CardDescription>Manage password and sign-in methods.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 rounded-xl border border-border/60 bg-accent/20 p-4">
-                                <div>
-                                    <p className="font-medium">Reset password</p>
-                                    <p className="text-sm text-muted-foreground">Change your password securely.</p>
-                                </div>
-                                <Button asChild className="rounded-xl">
-                                    <Link to="/reset-password">Reset Password</Link>
-                                </Button>
-                            </div>
+                            <ChangePasswordSection />
 
                             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 rounded-xl border border-dashed border-border/60 bg-accent/10 p-4">
                                 <div>

@@ -19,6 +19,10 @@ export default function ResetPasswordPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
+    if (!token) {
+      setErr("No reset token found. Please use the link from your password reset email.");
+      return;
+    }
     if (password !== confirm) {
       setErr("Passwords do not match");
       return;
@@ -29,7 +33,7 @@ export default function ResetPasswordPage() {
     }
     setLoading(true);
     try {
-      await api.post("/auth/reset-password", { token: token || "demo", new_password: password });
+      await api.post("/auth/reset-password", { token, new_password: password });
       setSuccess(true);
     } catch (e: any) {
       setErr(e?.response?.data?.detail ?? "Failed to reset password");
