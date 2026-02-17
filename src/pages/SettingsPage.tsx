@@ -9,63 +9,105 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BusySlotPainter } from "@/components/BusySlotPainter";
 import { Loader2, User, Clock, Link as LinkIcon, Calendar, Settings2, Shield, CheckCircle2 } from "lucide-react";
+import { PasswordStrengthIndicator, validatePassword } from "@/components/ui/password-strength";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 function ChangePasswordSection() {
+    const [open, setOpen] = useState(false);
     const [currentPw, setCurrentPw] = useState("");
     const [newPw, setNewPw] = useState("");
     const [confirmPw, setConfirmPw] = useState("");
     const [pwLoading, setPwLoading] = useState(false);
     const [pwMsg, setPwMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
+    function resetForm() {
+        setCurrentPw(""); setNewPw(""); setConfirmPw(""); setPwMsg(null);
+    }
+
+    function handleOpenChange(v: boolean) {
+        setOpen(v);
+        if (!v) resetForm();
+    }
+
     async function handleChangePassword() {
         setPwMsg(null);
-        if (!currentPw || !newPw) { setPwMsg({ type: "error", text: "All fields are required." }); return; }
-        if (newPw !== confirmPw) { setPwMsg({ type: "error", text: "New passwords do not match." }); return; }
-        if (newPw.length < 6) { setPwMsg({ type: "error", text: "Password must be at least 6 characters." }); return; }
+        if (!currentPw || !newPw || !confirmPw) {
+            setPwMsg({ type: "error", text: "All fields are required." }); return;
+        }
+        if (!validatePassword(newPw)) {
+            setPwMsg({ type: "error", text: "Password does not meet all requirements." }); return;
+        }
+        if (newPw !== confirmPw) {
+            setPwMsg({ type: "error", text: "New passwords do not match." }); return;
+        }
+        if (currentPw === newPw) {
+            setPwMsg({ type: "error", text: "New password must be different from current password." }); return;
+        }
         setPwLoading(true);
         try {
             await api.post("/auth/change-password", { current_password: currentPw, new_password: newPw });
             setPwMsg({ type: "success", text: "Password changed successfully!" });
-            setCurrentPw(""); setNewPw(""); setConfirmPw("");
+            setTimeout(() => handleOpenChange(false), 1500);
         } catch (e: any) {
             setPwMsg({ type: "error", text: e?.response?.data?.detail || "Failed to change password." });
         }
         setPwLoading(false);
     }
 
+    const isValid = validatePassword(newPw) && newPw === confirmPw && !!currentPw;
+
     return (
-        <div className="rounded-xl border border-border/60 bg-accent/20 p-4 space-y-4">
-            <div>
-                <p className="font-medium">Change password</p>
-                <p className="text-sm text-muted-foreground">Update your password securely.</p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="space-y-1">
-                    <Label className="text-xs">Current Password</Label>
-                    <Input type="password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} placeholder="••••••••" className="rounded-xl" />
+        <>
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 rounded-xl border border-border/60 bg-accent/20 p-4">
+                <div>
+                    <p className="font-medium">Password</p>
+                    <p className="text-sm text-muted-foreground">Update your password securely.</p>
                 </div>
-                <div className="space-y-1">
-                    <Label className="text-xs">New Password</Label>
-                    <Input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="••••••••" className="rounded-xl" />
-                </div>
-                <div className="space-y-1">
-                    <Label className="text-xs">Confirm New Password</Label>
-                    <Input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} placeholder="••••••••" className="rounded-xl" />
-                </div>
-            </div>
-            {pwMsg && (
-                <div className={`text-sm px-3 py-2 rounded-lg flex items-center gap-2 ${pwMsg.type === "success" ? "bg-green-500/10 text-green-600" : "bg-destructive/10 text-destructive"}`}>
-                    {pwMsg.type === "success" && <CheckCircle2 className="h-4 w-4" />}
-                    {pwMsg.text}
-                </div>
-            )}
-            <div className="flex justify-end">
-                <Button onClick={handleChangePassword} disabled={pwLoading || !currentPw || !newPw || !confirmPw} className="rounded-xl">
-                    {pwLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                <Button onClick={() => setOpen(true)} className="rounded-xl">
                     Change Password
                 </Button>
             </div>
-        </div>
+
+            <Dialog open={open} onOpenChange={handleOpenChange}>
+                <DialogContent className="sm:max-w-[440px] rounded-2xl bg-card">
+                    <DialogHeader>
+                        <DialogTitle>Change Password</DialogTitle>
+                        <DialogDescription>Enter your current password and choose a new one.</DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-2">
+                        <div className="space-y-2">
+                            <Label className="text-sm">Current Password</Label>
+                            <Input type="password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} placeholder="••••••••" className="rounded-xl" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-sm">New Password</Label>
+                            <Input type="password" value={newPw} onChange={e => setNewPw(e.target.value)} placeholder="••••••••" className="rounded-xl" />
+                            <PasswordStrengthIndicator password={newPw} />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-sm">Confirm New Password</Label>
+                            <Input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} placeholder="••••••••" className="rounded-xl" />
+                            {newPw && confirmPw && newPw !== confirmPw && (
+                                <p className="text-xs text-destructive font-medium">Passwords do not match</p>
+                            )}
+                        </div>
+                        {pwMsg && (
+                            <div className={`text-sm px-3 py-2 rounded-lg flex items-center gap-2 ${pwMsg.type === "success" ? "bg-green-500/10 text-green-600" : "bg-destructive/10 text-destructive"}`}>
+                                {pwMsg.type === "success" && <CheckCircle2 className="h-4 w-4" />}
+                                {pwMsg.text}
+                            </div>
+                        )}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => handleOpenChange(false)} className="rounded-xl">Cancel</Button>
+                        <Button onClick={handleChangePassword} disabled={pwLoading || !isValid} className="rounded-xl">
+                            {pwLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Update Password
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </>
     );
 }
 
