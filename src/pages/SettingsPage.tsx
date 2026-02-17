@@ -260,13 +260,13 @@ export default function SettingsPage() {
 
             <Tabs defaultValue={defaultTab} className="space-y-6">
                 <TabsList className="rounded-xl bg-secondary/60 p-1">
-                    <TabsTrigger value="general" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm transition-all">
+                    <TabsTrigger value="general" className="rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/20 transition-all font-medium">
                         <User className="mr-1.5 h-4 w-4" /> General
                     </TabsTrigger>
-                    <TabsTrigger value="schedule" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm transition-all">
+                    <TabsTrigger value="schedule" className="rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/20 transition-all font-medium">
                         <Clock className="mr-1.5 h-4 w-4" /> Schedule
                     </TabsTrigger>
-                    <TabsTrigger value="integrations" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm transition-all">
+                    <TabsTrigger value="integrations" className="rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/20 transition-all font-medium">
                         <LinkIcon className="mr-1.5 h-4 w-4" /> Integrations
                     </TabsTrigger>
                 </TabsList>
