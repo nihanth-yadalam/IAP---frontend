@@ -404,6 +404,12 @@ async function route(
     return { data: { ok: true } };
   }
 
+  // [M3] Google OAuth — get authorization URL
+  if (method === "GET" && path === "/auth/google/authorize") {
+    const res = await axiosInstance.get("/auth/google/authorize");
+    return { data: res.data };
+  }
+
   // [M26] Trigger manual Google sync
   if (method === "POST" && path === "/sync/trigger") {
     const res = await axiosInstance.post("/sync/trigger");
@@ -413,6 +419,18 @@ async function route(
   // [M28] Sync status
   if (method === "GET" && path === "/sync/status") {
     const res = await axiosInstance.get("/sync/status");
+    return { data: res.data };
+  }
+
+  // [M30] Push all un-synced slots to Google
+  if (method === "POST" && path === "/sync/push-all") {
+    const res = await axiosInstance.post("/sync/push-all");
+    return { data: res.data };
+  }
+
+  // [M31] Initialize calendar sync
+  if (method === "POST" && path === "/sync/initialize") {
+    const res = await axiosInstance.post("/sync/initialize");
     return { data: res.data };
   }
 

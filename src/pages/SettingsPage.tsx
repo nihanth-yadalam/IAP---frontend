@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BusySlotPainter } from "@/components/BusySlotPainter";
-import { Loader2, User, Clock, Link as LinkIcon, Calendar, Settings2, Shield, CheckCircle2 } from "lucide-react";
+import { Loader2, User, Clock, Link as LinkIcon, Calendar, Settings2, Shield, CheckCircle2, ExternalLink, RefreshCw, Upload, Unlink } from "lucide-react";
 import { PasswordStrengthIndicator, validatePassword } from "@/components/ui/password-strength";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -114,6 +115,9 @@ function ChangePasswordSection() {
 export default function SettingsPage() {
     const { user } = useAuthStore();
     const [loading, setLoading] = useState(false);
+    const token = useAuthStore((s) => s.token);
+    const [searchParams] = useSearchParams();
+    const defaultTab = searchParams.get("tab") || "general";
 
     // Profile State
     const [name, setName] = useState("");
@@ -128,9 +132,15 @@ export default function SettingsPage() {
     // Schedule State
     const [busyGrid, setBusyGrid] = useState<Record<string, boolean>>({});
 
+    // Google Calendar State
+    const [syncStatus, setSyncStatus] = useState<any>(null);
+    const [syncLoading, setSyncLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
+
     useEffect(() => {
         loadProfile();
         loadBusySlots();
+        loadSyncStatus();
     }, []);
 
     const DAY_NAME_TO_INDEX: Record<string, number> = {
@@ -198,6 +208,46 @@ export default function SettingsPage() {
         setLoading(false);
     }
 
+    async function loadSyncStatus() {
+        try {
+            const res = await api.get("/sync/status");
+            setSyncStatus(res.data);
+        } catch { setSyncStatus(null); }
+    }
+
+    async function connectGoogle() {
+        setGoogleLoading(true);
+        try {
+            const res = await api.get("/auth/google/authorize");
+            if (res.data?.authorization_url) {
+                window.location.href = res.data.authorization_url;
+            }
+        } catch (e) {
+            console.error("Failed to get Google auth URL", e);
+        }
+        setGoogleLoading(false);
+    }
+
+    async function handleSyncNow() {
+        setSyncLoading(true);
+        try {
+            await api.post("/sync/trigger");
+            await loadSyncStatus();
+        } catch (e) { console.error(e); }
+        setSyncLoading(false);
+    }
+
+    async function handlePushAll() {
+        setSyncLoading(true);
+        try {
+            await api.post("/sync/push-all");
+            await loadSyncStatus();
+        } catch (e) { console.error(e); }
+        setSyncLoading(false);
+    }
+
+    const isGoogleLinked = syncStatus?.sync_initialized === true;
+
     return (
         <div className="space-y-6">
             <div className="space-y-1">
@@ -208,7 +258,7 @@ export default function SettingsPage() {
                 <p className="text-muted-foreground">Manage your profile, preferences, and schedule.</p>
             </div>
 
-            <Tabs defaultValue="general" className="space-y-6">
+            <Tabs defaultValue={defaultTab} className="space-y-6">
                 <TabsList className="rounded-xl bg-secondary/60 p-1">
                     <TabsTrigger value="general" className="rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm transition-all">
                         <User className="mr-1.5 h-4 w-4" /> General
@@ -322,16 +372,26 @@ export default function SettingsPage() {
 
                             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 rounded-xl border border-dashed border-border/60 bg-accent/10 p-4">
                                 <div>
-                                    <p className="font-medium">Google sign-in</p>
-                                    <p className="text-sm text-muted-foreground">Sign in faster with Google (UI stub).</p>
+                                    <p className="font-medium">Google Calendar</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        {isGoogleLinked ? "Your Google Calendar is connected." : "Link your Google account for calendar sync."}
+                                    </p>
                                 </div>
-                                <Button
-                                    variant="outline"
-                                    className="rounded-xl"
-                                    onClick={() => alert("Google OAuth needs backend configuration. This is a frontend-only stub.")}
-                                >
-                                    Connect Google
-                                </Button>
+                                {isGoogleLinked ? (
+                                    <span className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-600">
+                                        <CheckCircle2 className="h-3.5 w-3.5" /> Connected
+                                    </span>
+                                ) : (
+                                    <Button
+                                        variant="outline"
+                                        className="rounded-xl"
+                                        onClick={connectGoogle}
+                                        disabled={googleLoading}
+                                    >
+                                        {googleLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Connect Google
+                                    </Button>
+                                )}
                             </div>
                         </CardContent>
                     </Card>
@@ -362,23 +422,79 @@ export default function SettingsPage() {
                 <TabsContent value="integrations" className="space-y-6 animate-fade-in">
                     <Card className="rounded-2xl border-border/50">
                         <CardHeader>
-                            <CardTitle className="text-lg">Google Calendar</CardTitle>
-                            <CardDescription>Connect your Google Calendar to import events as busy slots.</CardDescription>
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <Calendar className="h-5 w-5 text-primary" />
+                                Google Calendar
+                            </CardTitle>
+                            <CardDescription>Connect your Google Calendar to import events and export scheduled tasks.</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex items-center justify-between rounded-xl border border-dashed border-border/60 bg-accent/20 p-6">
+                        <CardContent className="space-y-5">
+                            {/* Connection Status */}
+                            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 rounded-xl border border-border/60 bg-accent/20 p-5">
                                 <div className="space-y-1">
-                                    <p className="font-medium">Google Calendar</p>
-                                    <p className="text-sm text-muted-foreground">Import events and export scheduled tasks.</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-medium">Connection Status</p>
+                                        {isGoogleLinked ? (
+                                            <span className="inline-flex items-center gap-1 rounded-full bg-green-500/10 px-2.5 py-0.5 text-xs font-medium text-green-600">
+                                                <CheckCircle2 className="h-3 w-3" /> Connected
+                                            </span>
+                                        ) : (
+                                            <span className="inline-flex items-center gap-1 rounded-full bg-orange-500/10 px-2.5 py-0.5 text-xs font-medium text-orange-600">
+                                                <Unlink className="h-3 w-3" /> Not Connected
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">
+                                        {isGoogleLinked
+                                            ? `Calendar ID: ${syncStatus?.google_calendar_id || "primary"}`
+                                            : "Connect your Google account to enable two-way calendar sync."}
+                                    </p>
+                                    {isGoogleLinked && syncStatus?.last_synced_at && (
+                                        <p className="text-xs text-muted-foreground">
+                                            Last synced: {new Date(syncStatus.last_synced_at).toLocaleString()}
+                                        </p>
+                                    )}
                                 </div>
-                                <Button
-                                    variant="outline"
-                                    className="rounded-xl"
-                                    onClick={() => alert("Google Calendar connect is a UI stub in the frontend-only build.")}
-                                >
-                                    Connect
-                                </Button>
+                                {!isGoogleLinked ? (
+                                    <Button onClick={connectGoogle} disabled={googleLoading} className="rounded-xl">
+                                        {googleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ExternalLink className="mr-2 h-4 w-4" />}
+                                        Connect Google Calendar
+                                    </Button>
+                                ) : null}
                             </div>
+
+                            {/* Sync Controls — only visible when connected */}
+                            {isGoogleLinked && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <button
+                                        onClick={handleSyncNow}
+                                        disabled={syncLoading}
+                                        className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card p-4 text-left transition-colors hover:bg-accent/30 disabled:opacity-50"
+                                    >
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                            <RefreshCw className={`h-5 w-5 text-primary ${syncLoading ? 'animate-spin' : ''}`} />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-sm">Sync Now</p>
+                                            <p className="text-xs text-muted-foreground">Pull latest events from Google Calendar</p>
+                                        </div>
+                                    </button>
+
+                                    <button
+                                        onClick={handlePushAll}
+                                        disabled={syncLoading}
+                                        className="group flex items-center gap-3 rounded-xl border border-border/60 bg-card p-4 text-left transition-colors hover:bg-accent/30 disabled:opacity-50"
+                                    >
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                                            <Upload className={`h-5 w-5 text-primary ${syncLoading ? 'animate-spin' : ''}`} />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-sm">Push to Google</p>
+                                            <p className="text-xs text-muted-foreground">Export un-synced local slots to Google</p>
+                                        </div>
+                                    </button>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </TabsContent>
