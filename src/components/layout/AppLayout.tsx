@@ -11,10 +11,19 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuthStore } from "@/stores/useAuthStore";
-import { User, Settings, LogOut, GraduationCap, Sunrise, Sunset } from "lucide-react";
+import { User, Settings, LogOut, GraduationCap, Sunrise, Sunset, RefreshCw } from "lucide-react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useTheme } from "@/components/theme-provider";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { api } from "@/lib/api";
+import { cn } from "@/lib/utils";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import morningAvatar from "@/assets/avatars/morning.svg";
 import balancedAvatar from "@/assets/avatars/balanced.svg";
@@ -22,7 +31,36 @@ import nightAvatar from "@/assets/avatars/night.svg";
 
 export function AppLayout() {
     const { user, logout } = useAuthStore();
-    const { theme } = useTheme(); // Keep useTheme for chronotype icons if needed, otherwise remove
+    const { theme } = useTheme();
+
+    // Sync state
+    const [isSyncing, setIsSyncing] = useState(false);
+    const [lastSynced, setLastSynced] = useState<string | null>(null);
+
+    // Fetch sync status on mount
+    useEffect(() => {
+        if (user?.google_linked) {
+            api.get("/sync/status").then((res) => {
+                if (res.data?.last_synced_at) {
+                    setLastSynced(res.data.last_synced_at);
+                }
+            }).catch(console.error);
+        }
+    }, [user?.google_linked]);
+
+    const handleSync = async () => {
+        setIsSyncing(true);
+        try {
+            const res = await api.post("/sync/trigger");
+            if (res.data?.synced_at) {
+                setLastSynced(res.data.synced_at);
+            }
+        } catch (e) {
+            console.error("Sync failed", e);
+        } finally {
+            setIsSyncing(false);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-background text-foreground flex">
@@ -38,13 +76,38 @@ export function AppLayout() {
                             Schedora
                         </span>
 
-                        {/* Desktop: Breadcrumbs or Page Title could go here later */}
                         <div className="hidden lg:flex items-center gap-2 text-muted-foreground text-sm font-medium">
-                            {/* Placeholder for potential breadcrumbs */}
                         </div>
                     </div>
 
                     <div className="flex items-center gap-3 ml-auto">
+                        {/* Sync Button */}
+                        {user?.google_linked && (
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={handleSync}
+                                            disabled={isSyncing}
+                                            className="rounded-full w-9 h-9"
+                                        >
+                                            <RefreshCw className={cn("h-4 w-4", isSyncing && "animate-spin")} />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Sync with Google Calendar</p>
+                                        {lastSynced && (
+                                            <p className="text-xs text-muted-foreground mt-1">
+                                                Last: {new Date(lastSynced).toLocaleString()}
+                                            </p>
+                                        )}
+                                    </TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
+                        )}
+
                         {/* Theme Toggle */}
                         <ThemeToggle />
 

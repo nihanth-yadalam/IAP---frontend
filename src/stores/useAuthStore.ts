@@ -9,6 +9,7 @@ interface User {
     name?: string | null
     avatar_url?: string
     chronotype?: "morning" | "balanced" | "night"
+    google_linked?: boolean
 }
 
 interface AuthState {
