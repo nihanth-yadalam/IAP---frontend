@@ -6,7 +6,7 @@
 
 ---
 
-## 📖 Project Overview
+##  Project Overview
 
 **L1: Intelligent Academic Planner** is a web-based productivity platform designed to solve the disconnect between planning and execution that students face daily. Unlike passive calendar applications that treat every hour as equal, L1 uses AI to model the user's habits, learning style, and energy levels to create realistic, achievable schedules.
 
@@ -27,7 +27,7 @@ L1 integrates academic context (deadlines, course difficulty) with behavioral he
 
 ---
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 ### Frontend
 - **Framework**: React 18 + TypeScript
@@ -39,7 +39,7 @@ L1 integrates academic context (deadlines, course difficulty) with behavioral he
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 Frontend/
@@ -91,7 +91,7 @@ Frontend/
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### Prerequisites
 - Node.js 18+ and npm/yarn
@@ -131,7 +131,7 @@ npm run preview
 
 ---
 
-## 🔐 Key Features Explained
+##  Key Features Explained
 
 ### 1. **Authentication & Authorization** (Epic 1)
 - Secure signup/login with JWT tokens
@@ -158,7 +158,7 @@ Upon first login, users complete:
 
 ---
 
-## 🔄 Data Flow
+##  Data Flow
 
 ```
 User Input (Signup/Onboarding)
@@ -178,7 +178,7 @@ AI Adapts Future Predictions & Scheduling
 
 ---
 
-## 🎨 UI Components
+##  UI Components
 
 Key reusable components from Shadcn/UI:
 - `calendar.tsx` - Date picker
@@ -193,7 +193,7 @@ Key reusable components from Shadcn/UI:
 
 ---
 
-## 🔗 API Integration
+##  API Integration
 
 The frontend communicates with the backend API for:
 
@@ -212,7 +212,7 @@ The frontend communicates with the backend API for:
 
 ---
 
-## 📄 License
+##  License
 
 See LICENSE file for details.
 
@@ -221,3 +221,4 @@ See LICENSE file for details.
 
 **Last Updated**: February 2026  
 **Implementation Status**: Sprint 1 (Epics 1, 2, and Story 3.1 complete)
+
