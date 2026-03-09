@@ -19,6 +19,7 @@ interface AuthState {
     isLoading: boolean
     error: string | null
     login: (login: string, password: string) => Promise<void>
+    loginWithToken: (token: string) => Promise<{ first_login: boolean }>
     signup: (username: string, email: string, password: string, name: string) => Promise<void>
     logout: () => void
     checkAuth: () => Promise<void>
@@ -33,6 +34,23 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
             isLoading: false,
             error: null,
+
+            loginWithToken: async (token: string) => {
+                setAuthToken(token)
+                set({ token, isAuthenticated: true, isLoading: true, error: null })
+                try {
+                    const me = await api.get('/auth/me')
+                    set({ user: me.data, isLoading: false })
+                    const onboardingComplete =
+                        !!me.data.profile?.onboarding_data &&
+                        Object.keys(me.data.profile.onboarding_data).length > 0
+                    return { first_login: !onboardingComplete }
+                } catch (error: any) {
+                    set({ isLoading: false, error: 'Failed to load account', isAuthenticated: false, token: null })
+                    setAuthToken(null)
+                    throw error
+                }
+            },
 
             login: async (loginStr, password) => {
                 set({ isLoading: true, error: null })

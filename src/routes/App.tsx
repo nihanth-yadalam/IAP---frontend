@@ -5,6 +5,7 @@ import SignupPage from "@/pages/SignupPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import GoogleCallbackPage from "@/pages/GoogleCallbackPage";
+import GoogleLoginCallbackPage from "@/pages/GoogleLoginCallbackPage";
 import WizardPage from "@/pages/WizardPage";
 import HomePage from "@/pages/HomePage";
 import CalendarPage from "@/pages/CalendarPage";
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/forgot" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/oauth/callback" element={<GoogleCallbackPage />} />
+        <Route path="/auth/google/callback" element={<GoogleLoginCallbackPage />} />
 
         {/* Protected Routes */}
         <Route
