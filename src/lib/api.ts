@@ -237,7 +237,7 @@ async function route(
 
   // [M2] Register
   if (method === "POST" && path === "/auth/signup") {
-    const res = await axiosInstance.post("/users", {
+    const res = await axiosInstance.post("/users/", {
       email: body.email,
       username: body.username,
       password: body.password,
