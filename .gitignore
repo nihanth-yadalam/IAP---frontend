@@ -7,4 +7,9 @@ build/
 Project_Overview.txt
 Core_Features.txt
 Epics.txt
+<<<<<<< HEAD
 Tech stack and DB schema.txt
+.vscode/
+=======
+Tech stack and DB schema.txt
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851

@@ -9,7 +9,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BusySlotPainter } from "@/components/BusySlotPainter";
+<<<<<<< HEAD
+import { Loader2, User, Clock, Link as LinkIcon, Calendar, Settings2, Shield, CheckCircle2, ExternalLink, RefreshCw, Upload, Unlink, BrainCircuit, Sparkles, Plus, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+=======
 import { Loader2, User, Clock, Link as LinkIcon, Calendar, Settings2, Shield, CheckCircle2, ExternalLink, RefreshCw, Upload, Unlink } from "lucide-react";
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
 import { PasswordStrengthIndicator, validatePassword } from "@/components/ui/password-strength";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -131,6 +135,18 @@ export default function SettingsPage() {
 
     // Schedule State
     const [busyGrid, setBusyGrid] = useState<Record<string, boolean>>({});
+<<<<<<< HEAD
+    
+    // AI Memory / Rules State
+    interface AIRule { id: string; text: string; enabled: boolean; }
+    const [aiRules, setAiRules] = useState<AIRule[]>([
+        { id: "1", text: "No classes before 10 AM if possible.", enabled: true },
+        { id: "2", text: "Prefer 2-hour focus blocks for programming assignments.", enabled: true },
+        { id: "3", text: "Avoid math after 8 PM.", enabled: false }
+    ]);
+    const [newRule, setNewRule] = useState("");
+=======
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
 
     // Google Calendar State
     const [syncStatus, setSyncStatus] = useState<any>(null);
@@ -266,6 +282,12 @@ export default function SettingsPage() {
                     <TabsTrigger value="schedule" className="rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/20 transition-all font-medium">
                         <Clock className="mr-1.5 h-4 w-4" /> Schedule
                     </TabsTrigger>
+<<<<<<< HEAD
+                    <TabsTrigger value="intelligence" className="rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/20 transition-all font-medium">
+                        <BrainCircuit className="mr-1.5 h-4 w-4" /> AI Memory
+                    </TabsTrigger>
+=======
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
                     <TabsTrigger value="integrations" className="rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/20 transition-all font-medium">
                         <LinkIcon className="mr-1.5 h-4 w-4" /> Integrations
                     </TabsTrigger>
@@ -419,6 +441,107 @@ export default function SettingsPage() {
                     </Card>
                 </TabsContent>
 
+<<<<<<< HEAD
+                <TabsContent value="intelligence" className="space-y-6 animate-fade-in">
+                    {/* Persona Dashboard & Rolling Summary */}
+                    <Card className="rounded-2xl border-primary/20 bg-gradient-to-br from-primary/5 to-vibrant-purple/10">
+                        <CardHeader>
+                            <CardTitle className="text-lg flex items-center gap-2 text-primary">
+                                <Sparkles className="h-5 w-5 animate-twinkle" />
+                                Reflexion Agent & Persona
+                            </CardTitle>
+                            <CardDescription>How the AI planner perceives your habits based on recent history.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="p-4 rounded-xl bg-card border shadow-sm">
+                                    <h4 className="font-semibold text-sm mb-3 text-muted-foreground uppercase tracking-wider">Current Archetype</h4>
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-12 w-12 rounded-full bg-vibrant-purple/20 flex items-center justify-center text-3xl shadow-sm animate-float">🦉</div>
+                                        <div>
+                                            <div className="font-bold text-lg">The Night Owl</div>
+                                            <div className="text-xs text-muted-foreground">Focus peaks past 8 PM</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="p-4 rounded-xl bg-card border shadow-sm">
+                                    <h4 className="font-semibold text-sm mb-3 text-muted-foreground uppercase tracking-wider">Rolling Summary (Last 5 Days)</h4>
+                                    <ul className="space-y-2 text-sm">
+                                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-green-500" /> Math tasks complete 30% faster than planned</li>
+                                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-orange-500" /> High drain reported after 10 PM</li>
+                                        <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-blue-500" /> Longest focus streak usually mid-week</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="rounded-2xl border-border/50">
+                        <CardHeader>
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <BrainCircuit className="h-5 w-5 text-primary" />
+                                Explicit Memory Rules
+                            </CardTitle>
+                            <CardDescription>Add unbreakable rules the AI must follow when scheduling.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-5">
+                            <div className="flex gap-2">
+                                <Input 
+                                    value={newRule} 
+                                    onChange={e => setNewRule(e.target.value)} 
+                                    placeholder="e.g. Always add a 30-minute buffer for Geometry" 
+                                    className="rounded-xl flex-1 bg-secondary/50"
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter' && newRule.trim()) {
+                                            setAiRules([...aiRules, { id: Date.now().toString(), text: newRule, enabled: true }]);
+                                            setNewRule("");
+                                        }
+                                    }}
+                                />
+                                <Button 
+                                    onClick={() => {
+                                        if(newRule.trim()) {
+                                            setAiRules([...aiRules, { id: Date.now().toString(), text: newRule, enabled: true }]);
+                                            setNewRule("");
+                                        }
+                                    }} 
+                                    className="rounded-xl"
+                                >
+                                    <Plus className="h-4 w-4 mr-1" /> Add Rule
+                                </Button>
+                            </div>
+
+                            <div className="space-y-2">
+                                {aiRules.map((rule) => (
+                                    <div key={rule.id} className={`flex items-center justify-between p-3 rounded-xl border transition-colors ${rule.enabled ? 'bg-card border-border' : 'bg-secondary/40 border-dashed text-muted-foreground'}`}>
+                                        <div className="flex items-center gap-3">
+                                            <button 
+                                                onClick={() => setAiRules(aiRules.map(r => r.id === rule.id ? { ...r, enabled: !r.enabled } : r))}
+                                                className={`text-2xl transition-transform hover:scale-110 ${rule.enabled ? 'text-primary' : 'text-muted-foreground'}`}
+                                            >
+                                                {rule.enabled ? <ToggleRight className="h-6 w-6" /> : <ToggleLeft className="h-6 w-6" />}
+                                            </button>
+                                            <span className={rule.enabled ? "font-medium" : "line-through opacity-70"}>{rule.text}</span>
+                                        </div>
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10 rounded-lg" onClick={() => setAiRules(aiRules.filter(r => r.id !== rule.id))}>
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                ))}
+                                {aiRules.length === 0 && <p className="text-center text-muted-foreground text-sm py-4">No custom rules added yet.</p>}
+                            </div>
+
+                            <div className="flex justify-end pt-2">
+                                <Button onClick={() => alert("Rules updated in AI Memory!")} className="rounded-xl bg-vibrant-blue hover:bg-vibrant-blue/90 text-white">
+                                    Save Rules
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+=======
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
                 <TabsContent value="integrations" className="space-y-6 animate-fade-in">
                     <Card className="rounded-2xl border-border/50">
                         <CardHeader>
