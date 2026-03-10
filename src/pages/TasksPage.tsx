@@ -1,11 +1,15 @@
 import { useState, useEffect } from "react";
 import { useTaskStore, Task } from "@/stores/useTaskStore";
 import ScheduleDialog from "@/components/ScheduleDialog";
+<<<<<<< HEAD
 import TaskFeedbackDialog from "@/components/TaskFeedbackDialog";
+=======
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+<<<<<<< HEAD
 import { Plus, Edit, Trash2, CheckCircle, Search, ClipboardList, Sparkles, Loader2, RotateCcw, PartyPopper } from "lucide-react";
 import { format, addHours, setHours, setMinutes } from "date-fns";
 import { toast } from "sonner";
@@ -14,11 +18,16 @@ import { TaskCardSkeleton } from "@/components/Skeleton";
 import { rankTasksForGap } from "@/lib/scheduling";
 import GapFillerModal from "@/components/GapFillerModal";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+=======
+import { Plus, Edit, Trash2, CheckCircle, Search, ClipboardList } from "lucide-react";
+import { format } from "date-fns";
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
 
 export default function TasksPage() {
     const { tasks, fetchTasks, deleteTask, completeTask, isLoading } = useTaskStore();
     const [openSchedule, setOpenSchedule] = useState(false);
     const [selectedTask, setSelectedTask] = useState<Task | undefined>(undefined);
+<<<<<<< HEAD
     const [taskForFeedback, setTaskForFeedback] = useState<Task | undefined>(undefined);
     const [openFeedback, setOpenFeedback] = useState(false);
     const [filterStatus, setFilterStatus] = useState<string>("all");
@@ -27,6 +36,10 @@ export default function TasksPage() {
     const [confettiActive, setConfettiActive] = useState(false);
     const [gapTaskSuggestion, setGapTaskSuggestion] = useState<Task | null>(null);
     const { updateTask } = useTaskStore();
+=======
+    const [filterStatus, setFilterStatus] = useState<string>("all");
+    const [search, setSearch] = useState("");
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
 
     useEffect(() => {
         fetchTasks();
@@ -42,6 +55,7 @@ export default function TasksPage() {
         setSelectedTask(task);
         setOpenSchedule(true);
     };
+<<<<<<< HEAD
     
     const handleDelete = async (id: string) => {
         if (confirm("Task deleted. Would you like to re-optimize the free time in your schedule to fill the gap?")) {
@@ -83,6 +97,10 @@ export default function TasksPage() {
             toast.success('🎊 Task completed! Great work!');
         }
     };
+=======
+    const handleDelete = async (id: string) => await deleteTask(id);
+    const handleComplete = async (id: string) => await completeTask(id);
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
 
     const categoryColor = (cat: string) => {
         switch (cat) {
@@ -100,6 +118,7 @@ export default function TasksPage() {
         }
     };
 
+<<<<<<< HEAD
     const handleSmartSchedule = async () => {
         setIsScheduling(true);
         try {
@@ -165,6 +184,23 @@ export default function TasksPage() {
                         Add Task
                     </Button>
                 </div>
+=======
+    return (
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                    <h1 className="text-3xl font-bold tracking-tight">Tasks</h1>
+                    <p className="text-muted-foreground">Manage your assignments and to-dos.</p>
+                </div>
+                <Button
+                    onClick={() => { setSelectedTask(undefined); setOpenSchedule(true); }}
+                    className="rounded-xl shadow-neon transition-all duration-200 hover:-translate-y-0.5 active:scale-95"
+                >
+                    <Plus className="mr-1.5 h-4 w-4" />
+                    Add Task
+                </Button>
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
             </div>
 
             {/* Filters */}
@@ -217,17 +253,21 @@ export default function TasksPage() {
                         </Button>
                     )}
                 </div>
+<<<<<<< HEAD
             ) : isLoading ? (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {Array.from({ length: 6 }).map((_, i) => (
                         <TaskCardSkeleton key={i} />
                     ))}
                 </div>
+=======
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
             ) : (
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                     {filteredTasks.map((task, i) => (
                         <Card
                             key={task.id}
+<<<<<<< HEAD
                             className={`group relative overflow-hidden rounded-2xl border border-border/50 glass-card hover:shadow-xl hover:shadow-primary/15 transition-all duration-300 hover:-translate-y-1.5 animate-slide-up glow-card ${
                                 task.status === 'completed'
                                     ? 'border-vibrant-green/30 bg-gradient-to-br from-vibrant-green/5 to-transparent'
@@ -261,10 +301,30 @@ export default function TasksPage() {
                                     {task.status === 'completed' && (
                                         <span className="shrink-0 text-lg animate-bounce-in" title="Completed!">🏆</span>
                                     )}
+=======
+                            className="group relative overflow-hidden rounded-2xl border-border/50 bg-card border-border hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-0.5 animate-fade-in"
+                            style={{ animationDelay: `${i * 40}ms` }}
+                        >
+                            <CardHeader className="pb-3">
+                                <div className="flex items-start justify-between gap-2">
+                                    <div className="space-y-1.5 min-w-0">
+                                        <CardTitle className="text-base font-semibold truncate">{task.title}</CardTitle>
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide ${categoryColor(task.category)}`}>
+                                                {task.category}
+                                            </span>
+                                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                <span className={`h-1.5 w-1.5 rounded-full ${priorityDot(task.priority)}`} />
+                                                {task.priority}
+                                            </span>
+                                        </div>
+                                    </div>
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
                                 </div>
                             </CardHeader>
                             <CardContent className="pt-0">
                                 <p className="text-xs text-muted-foreground">
+<<<<<<< HEAD
                                     📅 Due {format(new Date(task.deadline), "MMM d, yyyy · h:mm a")}
                                 </p>
                                 {/* Priority gradient bar */}
@@ -290,6 +350,21 @@ export default function TasksPage() {
                                         <Edit className="h-4 w-4" />
                                     </Button>
                                     <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 hover:scale-110 transition-transform" onClick={() => handleDelete(task.id)} title="Delete">
+=======
+                                    Due {format(new Date(task.deadline), "MMM d, yyyy · h:mm a")}
+                                </p>
+                                {/* Actions */}
+                                <div className="flex justify-end gap-1 mt-4 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-y-1 group-hover:translate-y-0">
+                                    {task.status !== "completed" && (
+                                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-green-100 dark:hover:bg-green-900/30" onClick={() => handleComplete(task.id)} title="Complete">
+                                            <CheckCircle className="h-4 w-4 text-green-600" />
+                                        </Button>
+                                    )}
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg" onClick={() => handleEdit(task)} title="Edit">
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30" onClick={() => handleDelete(task.id)} title="Delete">
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
                                         <Trash2 className="h-4 w-4 text-destructive" />
                                     </Button>
                                 </div>
@@ -307,6 +382,7 @@ export default function TasksPage() {
                 }}
                 taskToEdit={selectedTask}
             />
+<<<<<<< HEAD
 
             <TaskFeedbackDialog
                open={openFeedback}
@@ -329,6 +405,8 @@ export default function TasksPage() {
                     toast.success("Task pulled forward!");
                 }}
             />
+=======
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
         </div>
     );
 }

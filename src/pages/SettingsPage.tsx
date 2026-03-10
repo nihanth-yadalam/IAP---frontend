@@ -9,7 +9,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BusySlotPainter } from "@/components/BusySlotPainter";
+<<<<<<< HEAD
 import { Loader2, User, Clock, Link as LinkIcon, Calendar, Settings2, Shield, CheckCircle2, ExternalLink, RefreshCw, Upload, Unlink, BrainCircuit, Sparkles, Plus, Trash2, ToggleLeft, ToggleRight } from "lucide-react";
+=======
+import { Loader2, User, Clock, Link as LinkIcon, Calendar, Settings2, Shield, CheckCircle2, ExternalLink, RefreshCw, Upload, Unlink } from "lucide-react";
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
 import { PasswordStrengthIndicator, validatePassword } from "@/components/ui/password-strength";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -131,6 +135,7 @@ export default function SettingsPage() {
 
     // Schedule State
     const [busyGrid, setBusyGrid] = useState<Record<string, boolean>>({});
+<<<<<<< HEAD
     
     // AI Memory / Rules State
     interface AIRule { id: string; text: string; enabled: boolean; }
@@ -140,6 +145,8 @@ export default function SettingsPage() {
         { id: "3", text: "Avoid math after 8 PM.", enabled: false }
     ]);
     const [newRule, setNewRule] = useState("");
+=======
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
 
     // Google Calendar State
     const [syncStatus, setSyncStatus] = useState<any>(null);
@@ -275,9 +282,12 @@ export default function SettingsPage() {
                     <TabsTrigger value="schedule" className="rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/20 transition-all font-medium">
                         <Clock className="mr-1.5 h-4 w-4" /> Schedule
                     </TabsTrigger>
+<<<<<<< HEAD
                     <TabsTrigger value="intelligence" className="rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/20 transition-all font-medium">
                         <BrainCircuit className="mr-1.5 h-4 w-4" /> AI Memory
                     </TabsTrigger>
+=======
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
                     <TabsTrigger value="integrations" className="rounded-lg data-[state=active]:bg-primary/15 data-[state=active]:text-primary data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-primary/20 transition-all font-medium">
                         <LinkIcon className="mr-1.5 h-4 w-4" /> Integrations
                     </TabsTrigger>
@@ -431,6 +441,7 @@ export default function SettingsPage() {
                     </Card>
                 </TabsContent>
 
+<<<<<<< HEAD
                 <TabsContent value="intelligence" className="space-y-6 animate-fade-in">
                     {/* Persona Dashboard & Rolling Summary */}
                     <Card className="rounded-2xl border-primary/20 bg-gradient-to-br from-primary/5 to-vibrant-purple/10">
@@ -529,6 +540,8 @@ export default function SettingsPage() {
                     </Card>
                 </TabsContent>
 
+=======
+>>>>>>> 9137b811872796b8f1aed4f7ae2c5ce35dbbe851
                 <TabsContent value="integrations" className="space-y-6 animate-fade-in">
                     <Card className="rounded-2xl border-border/50">
                         <CardHeader>
