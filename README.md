@@ -1,3 +1,4 @@
+#Schedora
 # L1 Intelligent Academic Planner — Frontend
 
 <p align="center">
