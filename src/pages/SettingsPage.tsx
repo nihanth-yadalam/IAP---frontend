@@ -115,7 +115,6 @@ function ChangePasswordSection() {
 export default function SettingsPage() {
     const { user } = useAuthStore();
     const [loading, setLoading] = useState(false);
-    const token = useAuthStore((s) => s.token);
     const [searchParams] = useSearchParams();
     const defaultTab = searchParams.get("tab") || "general";
 

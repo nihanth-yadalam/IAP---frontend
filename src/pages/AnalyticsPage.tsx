@@ -18,8 +18,8 @@ import {
     PieChart,
     Pie
 } from "recharts";
-import { format, subDays, startOfDay, isAfter } from "date-fns";
-import { Brain, Flame, Target, History, TrendingUp, AlertCircle, Edit2, Trash2, Sparkles, PieChart as PieIcon } from "lucide-react";
+import { format, subDays, startOfDay } from "date-fns";
+import { Brain, Flame, Target, History, TrendingUp, AlertCircle, Edit2, Trash2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ProgressRing } from "@/components/ProgressRing";
@@ -397,10 +397,10 @@ export default function AnalyticsPage() {
             {/* Edit Entry Modal (Mock/Simple) */}
             <Dialog open={!!editingTask} onOpenChange={(open) => !open && setEditingTask(null)}>
                 <DialogContent className="rounded-3xl max-w-sm">
-                    <CardHeader>
-                        <CardTitle className="text-lg">Edit History Entry</CardTitle>
-                        <CardDescription>Update details for {editingTask?.title}</CardDescription>
-                    </CardHeader>
+                    <DialogHeader>
+                        <DialogTitle className="text-lg">Edit History Entry</DialogTitle>
+                        <DialogDescription>Update details for {editingTask?.title}</DialogDescription>
+                    </DialogHeader>
                     <div className="p-4 space-y-4">
                         <div className="space-y-2">
                             <Label>Actual Duration (mins)</Label>

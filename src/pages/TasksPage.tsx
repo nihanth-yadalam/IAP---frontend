@@ -44,10 +44,10 @@ export default function TasksPage() {
     };
     
     const handleDelete = async (id: string) => {
-        if (confirm("Task deleted. Would you like to re-optimize the free time in your schedule to fill the gap?")) {
+        await deleteTask(id);
+        if (confirm("Task deleted. Would you like to re-optimize the freed time slot in your schedule?")) {
             await handleSmartSchedule();
         }
-        await deleteTask(id);
     };
 
     const handleRestore = async (id: string) => {
