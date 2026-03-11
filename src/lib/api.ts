@@ -305,6 +305,14 @@ async function route(
     const form = new URLSearchParams();
     form.append("username", body.login); 
     form.append("password", body.password);
+    const res = await axiosInstance.post("/auth/login/access-token", form, {
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    });
+    // OTP step — backend returns {status:"otp_pending", email} instead of a token
+    if (res.data?.status === "otp_pending") {
+      return { data: res.data };
+    }
+    // Normal token response (should not happen now, but keep as fallback)
     try {
       const res = await axiosInstance.post("/auth/login/access-token", form, {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -348,6 +356,18 @@ async function route(
       }
       throw e;
     }
+  }
+
+  // Confirm email
+  if (method === "POST" && path === "/auth/confirm-email") {
+    const res = await axiosInstance.post("/auth/confirm-email", { token: body.token });
+    return { data: res.data };
+  }
+
+  // Resend confirmation email
+  if (method === "POST" && path === "/auth/resend-confirmation") {
+    const res = await axiosInstance.post(`/auth/resend-confirmation?email=${encodeURIComponent(body.email)}`);
+    return { data: res.data };
   }
 
   // [M5] Get current user — flatten profile into top-level fields

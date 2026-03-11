@@ -6,6 +6,7 @@ type AuthState = {
   isAuthed: boolean
   user: { id: string; email: string; name: string; onboarding_complete: boolean } | null
   login: (email: string, password: string) => Promise<{ first_login: boolean }>
+  loginWithToken: (token: string) => Promise<{ first_login: boolean }>
   signup: (name: string, email: string, password: string) => Promise<void>
   logout: () => void
   refreshMe: () => Promise<void>
@@ -52,6 +53,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       token,
       isAuthed,
       user,
+      async loginWithToken(token: string) {
+        localStorage.setItem(TOKEN_KEY, token)
+        setAuthToken(token)
+        setToken(token)
+
+        const me = await api.get('/auth/me')
+        const u = me.data
+        const onboardingComplete = !!u.profile?.onboarding_data && Object.keys(u.profile.onboarding_data).length > 0
+        setUser({
+          id: u.id,
+          email: u.email,
+          name: u.name || u.username || '',
+          onboarding_complete: onboardingComplete,
+        })
+        return { first_login: !onboardingComplete }
+      },
       async login(email, password) {
         const res = await api.post('/auth/login', { login: email, password })
         const accessToken = res.data.access_token
