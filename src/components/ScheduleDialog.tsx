@@ -296,16 +296,39 @@ export default function ScheduleDialog({
           }
       }
 
-      const payload: any = {
+      let payload: any = {
         category, priority, title: title.trim(), description: description.trim(),
         deadline: deadlineIso,
       };
-      if (planned_start) payload.planned_start = planned_start;
+      if (planned_start && scheduleMode === "manual") payload.planned_start = planned_start;
       if (estimatedDurationMins) payload.estimated_duration_mins = Number(estimatedDurationMins);
       if (courseId !== "other") payload.course_id = courseId;
 
-      if (taskToEdit) { await updateTask(taskToEdit.id, payload); }
-      else { await addTask(payload); }
+      let savedTaskId = taskToEdit?.id;
+
+      if (taskToEdit) { 
+          await updateTask(taskToEdit.id, payload); 
+      } else { 
+          // Add task and get the response to get the ID for confirm-slot
+          const res = await api.post('/tasks', payload);
+          savedTaskId = res.data.id;
+          // Optimistically add to store since we bypassed addTask for the id
+          useTaskStore.getState().fetchTasks(); 
+      }
+
+      if (scheduleMode === "ai" && showRecommendations && selectedSlotIndex !== null) {
+          const slot = recommendedSlots[selectedSlotIndex];
+          await api.post('/tasks/confirm-slot', {
+              task_id: Number(savedTaskId),
+              scheduled_date: slot.date,
+              scheduled_start_time: slot.start_time,
+              scheduled_end_time: slot.end_time
+          });
+          // Refresh tasks to get the updated scheduled times
+          useTaskStore.getState().fetchTasks();
+          toast.success("Smart schedule confirmed!");
+      }
+
       onOpenChange(false);
     } catch (e: any) {
       const detail = e?.response?.data?.detail;

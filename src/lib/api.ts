@@ -99,7 +99,26 @@ axiosInstance.interceptors.response.use(
       }
       else if (url.includes('/courses') && method === 'DELETE') { mockData = { ok: true }; }
       else if (url.includes('/schedule/fixed') && method === 'GET') mockData = mockFixedSlots;
-      else if (url.includes('/schedule/fixed') && method === 'POST') { mockFixedSlots = body; mockData = { status: "ok" }; }
+      else if (url.includes('/tasks') && method === 'POST' && url.includes('estimate-duration')) {
+          mockData = { estimated_duration_mins: body.estimated_duration_mins || 60, reasoning: "This is a mock AI duration estimation based on the title and description provided." };
+      }
+      else if (url.includes('/tasks') && method === 'POST' && url.includes('recommend-slots')) {
+          const slotDate = new Date(); slotDate.setDate(slotDate.getDate() + 1);
+          mockData = {
+              recommendations: [
+                  { date: slotDate.toISOString().split('T')[0], day: "Tomorrow", start_time: "10:00:00", end_time: "12:00:00", reasoning: "Mock optimal morning slot." },
+                  { date: slotDate.toISOString().split('T')[0], day: "Tomorrow", start_time: "14:00:00", end_time: "16:00:00", reasoning: "Mock optimal afternoon slot." }
+              ]
+          };
+      }
+      else if (url.includes('/tasks') && method === 'POST' && url.includes('confirm-slot')) {
+          const t = mockTasks.find(x => String(x.id) === String(body.task_id));
+          if (t) {
+              t.planned_start = `${body.scheduled_date}T${body.scheduled_start_time}Z`;
+              t.planned_end = `${body.scheduled_date}T${body.scheduled_end_time}Z`;
+          }
+          mockData = t || { id: body.task_id, status: "Pending" };
+      }
       else if (url.includes('/onboarding/status')) mockData = { is_complete: true };
       else mockData = { ok: true, status: "mocked" };
 
@@ -448,6 +467,18 @@ async function route(
     return { data: taskFromBackend(res.data) };
   }
 
+  // [M28] Estimate Duration
+  if (method === "POST" && path === "/tasks/estimate-duration") {
+    const res = await axiosInstance.post("/tasks/estimate-duration", body);
+    return { data: res.data }; // returns {"estimated_duration_mins": ..., "reasoning": ...}
+  }
+
+  // [M29] Recommend Slots
+  if (method === "POST" && path === "/tasks/recommend-slots") {
+    const res = await axiosInstance.post("/tasks/recommend-slots", body);
+    return { data: res.data }; // returns {"recommendations": [...]}
+  }
+
   // [M20] Delete task  (check before update so regex doesn't capture first)
   const taskIdMatch = path.match(/^\/tasks\/([^/]+)$/);
 
@@ -475,6 +506,12 @@ async function route(
       drain_intensity: body.drainIntensity,
       completed_at: new Date().toISOString()
     });
+    return { data: taskFromBackend(res.data) };
+  }
+
+  // [M30] Confirm AI Slot
+  if (method === "POST" && path === "/tasks/confirm-slot") {
+    const res = await axiosInstance.post("/tasks/confirm-slot", body);
     return { data: taskFromBackend(res.data) };
   }
 
