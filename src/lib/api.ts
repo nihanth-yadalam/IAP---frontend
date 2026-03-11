@@ -263,6 +263,18 @@ async function route(
     return { data: res.data };
   }
 
+  // Confirm email
+  if (method === "POST" && path === "/auth/confirm-email") {
+    const res = await axiosInstance.post("/auth/confirm-email", { token: body.token });
+    return { data: res.data };
+  }
+
+  // Resend confirmation email
+  if (method === "POST" && path === "/auth/resend-confirmation") {
+    const res = await axiosInstance.post(`/auth/resend-confirmation?email=${encodeURIComponent(body.email)}`);
+    return { data: res.data };
+  }
+
   // [M5] Get current user — flatten profile into top-level fields
   if (method === "GET" && path === "/auth/me") {
     const res = await axiosInstance.get("/users/me");

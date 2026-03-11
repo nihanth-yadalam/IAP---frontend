@@ -2,6 +2,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "@/pages/LoginPage";
 import SignupPage from "@/pages/SignupPage";
+import ConfirmEmailPage from "@/pages/ConfirmEmailPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import GoogleCallbackPage from "@/pages/GoogleCallbackPage";
@@ -24,6 +25,7 @@ export default function App() {
         {/* Public Routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/confirm-email" element={<ConfirmEmailPage />} />
         <Route path="/forgot" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/oauth/callback" element={<GoogleCallbackPage />} />

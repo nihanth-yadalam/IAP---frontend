@@ -20,10 +20,14 @@ interface AuthState {
     error: string | null
     otpPending: boolean
     pendingEmail: string | null
+    signupComplete: boolean
+    signupEmail: string | null
     login: (login: string, password: string) => Promise<void>
     verifyOtp: (email: string, otp: string) => Promise<void>
     loginWithToken: (token: string) => Promise<{ first_login: boolean }>
     signup: (username: string, email: string, password: string, name: string) => Promise<void>
+    confirmEmail: (token: string) => Promise<string>
+    resendConfirmation: (email: string) => Promise<void>
     logout: () => void
     checkAuth: () => Promise<void>
     clearError: () => void
@@ -39,6 +43,8 @@ export const useAuthStore = create<AuthState>()(
             error: null,
             otpPending: false,
             pendingEmail: null,
+            signupComplete: false,
+            signupEmail: null,
 
             loginWithToken: async (token: string) => {
                 setAuthToken(token)
@@ -101,16 +107,43 @@ export const useAuthStore = create<AuthState>()(
             },
 
             signup: async (username, email, password, name) => {
-                set({ isLoading: true, error: null })
+                set({ isLoading: true, error: null, signupComplete: false, signupEmail: null })
                 try {
-                    // Register
                     await api.post('/auth/signup', { username, email, password, name })
-                    // Auto login after signup
-                    await get().login(username, password) // or email
+                    set({ isLoading: false, signupComplete: true, signupEmail: email })
                 } catch (error: any) {
                     set({
                         isLoading: false,
                         error: error?.response?.data?.detail || 'Signup failed'
+                    })
+                    throw error
+                }
+            },
+
+            confirmEmail: async (token: string) => {
+                set({ isLoading: true, error: null })
+                try {
+                    const res = await api.post('/auth/confirm-email', { token })
+                    set({ isLoading: false })
+                    return res.data.message
+                } catch (error: any) {
+                    set({
+                        isLoading: false,
+                        error: error?.response?.data?.detail || 'Email confirmation failed'
+                    })
+                    throw error
+                }
+            },
+
+            resendConfirmation: async (email: string) => {
+                set({ isLoading: true, error: null })
+                try {
+                    await api.post('/auth/resend-confirmation', { email })
+                    set({ isLoading: false })
+                } catch (error: any) {
+                    set({
+                        isLoading: false,
+                        error: error?.response?.data?.detail || 'Failed to resend confirmation'
                     })
                     throw error
                 }

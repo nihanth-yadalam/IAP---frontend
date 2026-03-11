@@ -5,29 +5,79 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, GraduationCap, Fingerprint } from "lucide-react";
+import { Loader2, GraduationCap, Fingerprint, Mail } from "lucide-react";
 import { PasswordStrengthIndicator, validatePassword } from "@/components/ui/password-strength";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { AuthLayout } from "@/components/AuthLayout";
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  const { signup, isLoading, error, clearError } = useAuthStore();
+  const { signup, resendConfirmation, isLoading, error, clearError, signupComplete, signupEmail } = useAuthStore();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [resent, setResent] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     clearError();
     try {
       await signup(username, email, password, name);
-      navigate("/wizard");
     } catch {
       // Error handled in store
     }
   };
+
+  const handleResend = async () => {
+    if (!signupEmail) return;
+    try {
+      await resendConfirmation(signupEmail);
+      setResent(true);
+      setTimeout(() => setResent(false), 30000);
+    } catch {
+      // Error handled in store
+    }
+  };
+
+  // ── Email confirmation pending screen ──────────────────────────────
+  if (signupComplete && signupEmail) {
+    return (
+      <AuthLayout
+        title="Check your email"
+        subtitle={`We sent a confirmation link to ${signupEmail}`}
+      >
+        <div className="space-y-5 text-center">
+          <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
+            <Mail className="w-8 h-8 text-primary" />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Click the link in the email to confirm your address and activate your account.
+          </p>
+
+          {error && (
+            <div className="text-sm font-medium text-destructive bg-destructive/10 px-3 py-2 rounded-lg animate-fade-in">
+              {error}
+            </div>
+          )}
+
+          <Button
+            variant="outline"
+            className="w-full h-11 rounded-xl font-medium"
+            onClick={handleResend}
+            disabled={isLoading || resent}
+          >
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {resent ? "Confirmation link sent!" : "Resend confirmation email"}
+          </Button>
+
+          <Link to="/login" className="block text-sm font-semibold text-primary hover:text-primary/80 transition-colors">
+            Back to Sign In
+          </Link>
+        </div>
+      </AuthLayout>
+    );
+  }
 
   return (
     <AuthLayout
