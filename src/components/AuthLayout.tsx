@@ -57,7 +57,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
                 </div>
 
                 <div className="relative z-20 mt-auto animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                    <div className="text-5xl mb-6 animate-float">🗓️</div>
+
                     <h2 className="text-3xl font-bold mb-3 leading-tight drop-shadow-md">
                         Your AI-powered<br />Intelligent Academic Planner
                     </h2>
