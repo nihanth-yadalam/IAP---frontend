@@ -1,0 +1,39 @@
+name: Frontend E2E Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      backend_url:
+        description: "Override backend URL (leave empty to use secret)"
+        required: false
+        type: string
+      frontend_url:
+        description: "Override frontend URL (leave empty to use secret)"
+        required: false
+        type: string
+
+jobs:
+  e2e:
+    name: E2E Tests (Live Infrastructure)
+    runs-on: ubuntu-latest
+
+    env:
+      BACKEND_LIVE_URL: ${{ inputs.backend_url || secrets.BACKEND_LIVE_URL }}
+      FRONTEND_LIVE_URL: ${{ inputs.frontend_url || secrets.FRONTEND_LIVE_URL }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run E2E tests
+        run: npx vitest run src/test/e2e/ --reporter=verbose
